@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "./generated/client"
 }
 
 datasource db {
@@ -19,30 +20,30 @@ model User {
   superAdminRestaurants                    Restaurant[] @relation("SuperAdminRestaurants")
   Restaurant_User_restaurantIdToRestaurant Restaurant?  @relation("User_restaurantIdToRestaurant", fields: [restaurantId], references: [id])
   roles                                    UserRole[]
-  role                                     Role[]        @relation("UserRole")
+  role                                     Role[]       @relation("UserRole")
   Restaurant_KitchenAdmin                  Restaurant[] @relation("KitchenAdmin")
 }
 
 model Role {
-  id          Int              @id @default(autoincrement())
-  name        String
-  permissions RolePermission[]
-  users       UserRole[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  restaurantId Int               // Link to the restaurant for which the role is created
-  restaurant   Restaurant?        @relation(fields: [restaurantId], references: [id])  // Relation to Restaurant model
-  roles        Role[] @relation("RoleHierarchy")
-  parentRole   Role?  @relation("RoleHierarchy", fields: [id], references: [id])
+  id           Int              @id @default(autoincrement())
+  name         String
+  permissions  RolePermission[]
+  users        UserRole[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  restaurantId Int // Link to the restaurant for which the role is created
+  restaurant   Restaurant?      @relation(fields: [restaurantId], references: [id]) // Relation to Restaurant model
+  roles        Role[]           @relation("RoleHierarchy")
+  parentRole   Role?            @relation("RoleHierarchy", fields: [id], references: [id])
 
   User User[] @relation("UserRole")
 }
 
 model Permission {
-  id     Int              @id @default(autoincrement())
-  action String
+  id      Int              @id @default(autoincrement())
+  action  String
   subject String
-  roles  RolePermission[]
+  roles   RolePermission[]
 }
 
 model UserRole {
@@ -63,19 +64,18 @@ model RolePermission {
   @@id([roleId, permissionId])
 }
 
-
 model Restaurant {
-  id                                 Int     @id @default(autoincrement())
-  name                               String
-  superAdminId                       Int?
-  imgUrl                             String
-  location                           String
-  orders                             Order[]
-  pizzas                             Pizza[]
-  superAdmin                         User?    @relation("SuperAdminRestaurants", fields: [superAdminId], references: [id])
+  id                Int     @id @default(autoincrement())
+  name              String
+  superAdminId      Int?
+  imgUrl            String
+  location          String
+  orders            Order[]
+  pizzas            Pizza[]
+  superAdmin        User?   @relation("SuperAdminRestaurants", fields: [superAdminId], references: [id])
   // User_KitchenAdmin field removed as it is already defined
-  roles                              Role[]
-  User_KitchenAdmin                  User[]  @relation("KitchenAdmin")
+  roles             Role[]
+  User_KitchenAdmin User[]  @relation("KitchenAdmin")
 
   User User[] @relation("User_restaurantIdToRestaurant")
 }
