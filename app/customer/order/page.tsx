@@ -1,10 +1,13 @@
+'use client'
 import Page from "@/components/page";
-import React from "react";
+import React, { Suspense } from "react";
 
-function page() {
-  <Suspense>
-    <Page/>
+function PageComponent() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Page />
     </Suspense>
+  );
 }
 
-export default page;
+export default PageComponent;
