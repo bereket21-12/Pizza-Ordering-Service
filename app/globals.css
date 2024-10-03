@@ -1,0 +1,82 @@
+/* Global body styles */
+body {
+  min-height: 100vh;
+  margin: 0px;
+  padding: 0px;
+  font-family: 'Roboto', sans-serif;
+  color: #333;
+  line-height: 1.6;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* background: linear-gradient(180deg, #FFFFFF 0%, #FFC993 76%, #FFF8F1 100%); */
+
+
+}
+
+
+/* Ensures the app takes up full height */
+html, body {
+  height: 100%;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+/* Global link styles */
+a {
+  color: #007BFF; /* Default blue link color */
+  text-decoration: none; /* Remove underline */
+  transition: color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+a:hover {
+  color: #FF8C00; /* Orange on hover */
+  text-decoration: underline; /* Add underline on hover */
+}
+
+/* Styling buttons globally */
+button {
+  font-family: inherit; /* Use the same font as the body */
+  font-size: 1rem; /* Consistent font size */
+  padding: 10px 20px; /* Spacing around the button text */
+  border: none; /* Remove default borders */
+  border-radius: 5px; /* Rounded corners for buttons */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease; /* Smooth background color transition */
+}
+
+/* A smooth scrolling effect for all pages */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Make images responsive */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Global box-sizing rule for easier layout */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Add some spacing to the container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+/* Custom Swiper Pagination Bullet */
+.swiper-pagination-bullet {
+  background-color: gray !important; /* Inactive bullet color */
+  opacity: 1 !important;
+}
+
+.swiper-pagination-bullet-active {
+  background-color: #FFA500 !important; /* Active bullet color */
+}
+
+
+

@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                                       Int          @id @default(autoincrement())
+  email                                    String       @unique
+  password                                 String
+  restaurantId                             Int?
+  location                                 String?
+  phoneNumber                              String
+  name                                     String?
+  orders                                   Order[]
+  superAdminRestaurants                    Restaurant[] @relation("SuperAdminRestaurants")
+  Restaurant_User_restaurantIdToRestaurant Restaurant?  @relation("User_restaurantIdToRestaurant", fields: [restaurantId], references: [id])
+  roles                                    UserRole[]
+  role                                     Role[]        @relation("UserRole")
+  Restaurant_KitchenAdmin                  Restaurant[] @relation("KitchenAdmin")
+}
+
+model Role {
+  id          Int              @id @default(autoincrement())
+  name        String
+  permissions RolePermission[]
+  users       UserRole[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  restaurantId Int               // Link to the restaurant for which the role is created
+  restaurant   Restaurant?        @relation(fields: [restaurantId], references: [id])  // Relation to Restaurant model
+  roles        Role[] @relation("RoleHierarchy")
+  parentRole   Role?  @relation("RoleHierarchy", fields: [id], references: [id])
+
+  User User[] @relation("UserRole")
+}
+
+model Permission {
+  id     Int              @id @default(autoincrement())
+  action String
+  subject String
+  roles  RolePermission[]
+}
+
+model UserRole {
+  userId Int
+  roleId Int
+  role   Role @relation(fields: [roleId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
+
+  @@id([userId, roleId])
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  role         Role       @relation(fields: [roleId], references: [id])
+
+  @@id([roleId, permissionId])
+}
+
+
+model Restaurant {
+  id                                 Int     @id @default(autoincrement())
+  name                               String
+  superAdminId                       Int?
+  imgUrl                             String
+  location                           String
+  orders                             Order[]
+  pizzas                             Pizza[]
+  superAdmin                         User?    @relation("SuperAdminRestaurants", fields: [superAdminId], references: [id])
+  // User_KitchenAdmin field removed as it is already defined
+  roles                              Role[]
+  User_KitchenAdmin                  User[]  @relation("KitchenAdmin")
+
+  User User[] @relation("User_restaurantIdToRestaurant")
+}
+
+model Pizza {
+  id           Int            @id @default(autoincrement())
+  name         String
+  imgurl       String
+  price        Float
+  restaurantId Int
+  Order        Order[]
+  restaurant   Restaurant     @relation(fields: [restaurantId], references: [id])
+  toppings     PizzaTopping[]
+}
+
+model PizzaTopping {
+  pizzaId   Int
+  toppingId Int
+  pizza     Pizza   @relation(fields: [pizzaId], references: [id])
+  topping   Topping @relation(fields: [toppingId], references: [id])
+
+  @@id([pizzaId, toppingId])
+}
+
+model Order {
+  id           Int            @id @default(autoincrement())
+  customerId   Int
+  pizzaId      Int
+  status       OrderStatus    @default(PENDING)
+  createdAt    DateTime       @default(now())
+  restaurantId Int
+  customer     User           @relation(fields: [customerId], references: [id])
+  Pizza        Pizza          @relation(fields: [pizzaId], references: [id])
+  restaurant   Restaurant     @relation(fields: [restaurantId], references: [id])
+  toppings     OrderTopping[]
+  quantity     Int
+}
+
+model Topping {
+  id     Int            @id @default(autoincrement())
+  name   String
+  orders OrderTopping[]
+  pizzas PizzaTopping[]
+}
+
+model OrderTopping {
+  orderId   Int
+  toppingId Int
+  order     Order   @relation(fields: [orderId], references: [id])
+  topping   Topping @relation(fields: [toppingId], references: [id])
+
+  @@id([orderId, toppingId])
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  DELIVERED
+}
