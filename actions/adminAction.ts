@@ -10,7 +10,7 @@ import bcrypt from "bcryptjs";
 import { MenuSchema, restaurantSchema, signUpSchema } from "../utils/schema";
 import { uploadImage } from "./uploadImage";
 import prisma from "@/lib/prisma";
-import { OrderStatus } from "@prisma/client";
+import OrderStatus from "@prisma/client";
 
 export async function handleCreateRestaurant(
   previousState: any,
@@ -307,7 +307,7 @@ export async function handleOrderForm(previousState: any, formData: FormData) {
       customer: { connect: { id: formValues.customerId } },
       Pizza: { connect: { id: formValues.pizzaId } },
       restaurant: { connect: { id: formValues.restaurantId } },
-      status: OrderStatus.PENDING,
+      status: OrderStatus.OrderStatus.PENDING,
       quantity: formValues.quantity,
       toppings: {
         create: toppings.map((toppingId) => ({
