@@ -1,17 +1,10 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "./generated/client"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-enum OrderStatus {
-  PENDING
-  PREPARING
-  DELIVERED
 }
 
 model User {
@@ -26,23 +19,22 @@ model User {
   superAdminRestaurants                    Restaurant[] @relation("SuperAdminRestaurants")
   Restaurant_User_restaurantIdToRestaurant Restaurant?  @relation("User_restaurantIdToRestaurant", fields: [restaurantId], references: [id])
   roles                                    UserRole[]
-  role                                     Role[]       @relation("UserRole")
   Restaurant_KitchenAdmin                  Restaurant[] @relation("KitchenAdmin")
+  role                                     Role[]       @relation("UserRole")
 }
 
 model Role {
   id           Int              @id @default(autoincrement())
   name         String
+  createdAt    DateTime         @default(now())
+  restaurantId Int
+  updatedAt    DateTime         @updatedAt
+  parentRole   Role             @relation("RoleHierarchy", fields: [id], references: [id])
+  roles        Role?            @relation("RoleHierarchy")
+  restaurant   Restaurant       @relation(fields: [restaurantId], references: [id])
   permissions  RolePermission[]
   users        UserRole[]
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-  restaurantId Int // Link to the restaurant for which the role is created
-  restaurant   Restaurant?      @relation(fields: [restaurantId], references: [id]) // Relation to Restaurant model
-  roles        Role[]           @relation("RoleHierarchy")
-  parentRole   Role?            @relation("RoleHierarchy", fields: [id], references: [id])
-
-  User User[] @relation("UserRole")
+  User         User[]           @relation("UserRole")
 }
 
 model Permission {
@@ -79,19 +71,17 @@ model Restaurant {
   orders            Order[]
   pizzas            Pizza[]
   superAdmin        User?   @relation("SuperAdminRestaurants", fields: [superAdminId], references: [id])
-  // User_KitchenAdmin field removed as it is already defined
   roles             Role[]
+  User              User[]  @relation("User_restaurantIdToRestaurant")
   User_KitchenAdmin User[]  @relation("KitchenAdmin")
-
-  User User[] @relation("User_restaurantIdToRestaurant")
 }
 
 model Pizza {
   id           Int            @id @default(autoincrement())
   name         String
+  restaurantId Int
   imgurl       String
   price        Float
-  restaurantId Int
   Order        Order[]
   restaurant   Restaurant     @relation(fields: [restaurantId], references: [id])
   toppings     PizzaTopping[]
@@ -113,11 +103,11 @@ model Order {
   status       OrderStatus    @default(PENDING)
   createdAt    DateTime       @default(now())
   restaurantId Int
+  quantity     Int
   customer     User           @relation(fields: [customerId], references: [id])
   Pizza        Pizza          @relation(fields: [pizzaId], references: [id])
   restaurant   Restaurant     @relation(fields: [restaurantId], references: [id])
   toppings     OrderTopping[]
-  quantity     Int
 }
 
 model Topping {
@@ -134,4 +124,10 @@ model OrderTopping {
   topping   Topping @relation(fields: [toppingId], references: [id])
 
   @@id([orderId, toppingId])
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  DELIVERED
 }
