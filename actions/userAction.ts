@@ -152,13 +152,3 @@ export async function getOrders(id: number) {
 
   return orders;
 }
-
-export async function createRole(role: string) {
-  const newRole = await prisma.role.create({
-    data: {
-      name: role,
-    },
-  });
-
-  return newRole;
-}
