@@ -13,6 +13,7 @@ const {
   empty,
   join,
   raw,
+  skip,
   Decimal,
   Debug,
   objectEnumValues,
@@ -31,11 +32,11 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 5.19.1
+ * Prisma Client JS version: 5.20.0
  * Query Engine version: 06fc58a368dc7be9fbbbe894adf8d445d208c284
  */
 Prisma.prismaVersion = {
-  client: "5.19.1",
+  client: "5.20.0",
   engine: "06fc58a368dc7be9fbbbe894adf8d445d208c284"
 }
 
@@ -74,6 +75,8 @@ Prisma.NullTypes = {
   JsonNull: objectEnumValues.classes.JsonNull,
   AnyNull: objectEnumValues.classes.AnyNull
 }
+
+
 
 
 
@@ -224,11 +227,11 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../../.env"
   },
   "relativePath": "../..",
-  "clientVersion": "5.19.1",
+  "clientVersion": "5.20.0",
   "engineVersion": "06fc58a368dc7be9fbbbe894adf8d445d208c284",
   "datasourceNames": [
     "db"
