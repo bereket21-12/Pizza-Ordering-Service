@@ -8,6 +8,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum OrderStatus {
+  PENDING
+  PREPARING
+  DELIVERED
+}
+
 model User {
   id                                       Int          @id @default(autoincrement())
   email                                    String       @unique
@@ -128,10 +134,4 @@ model OrderTopping {
   topping   Topping @relation(fields: [toppingId], references: [id])
 
   @@id([orderId, toppingId])
-}
-
-enum OrderStatus {
-  PENDING
-  PREPARING
-  DELIVERED
 }
