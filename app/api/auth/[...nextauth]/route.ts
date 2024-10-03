@@ -33,6 +33,16 @@ const authOptions: NextAuthOptions = {
                 role: {
                   select: {
                     name: true,
+                    permissions: {
+                      select: {
+                        permission: {
+                          select: {
+                            action: true,
+                            subject: true,
+                          },
+                        },
+                      },
+                    },
                   },
                 },
               },
@@ -45,15 +55,25 @@ const authOptions: NextAuthOptions = {
           user &&
           (await bcrypt.compare(credentials.password, user.password))
         ) {
-          const roles = user.roles.map((userRole: any) => userRole.role.name);
+          const rolesWithPermissions = user.roles.map((userRole) => ({
+            role: {
+              name: userRole.role.name,
+              permissions: userRole.role.permissions.map((perm) => ({
+                permission: {
+                  action: perm.permission.action,
+                  subject: perm.permission.subject,
+                },
+              })),
+            },
+          }));
 
           return {
             id: user.id,
             email: user.email,
             name: user.name,
-            roles: roles, // Include roles here
+            roles: rolesWithPermissions,
             restaurantId: user.restaurantId,
-          } as any; // Use `any` or the correct type assertion
+          };
         }
         return null;
       },
@@ -66,16 +86,28 @@ const authOptions: NextAuthOptions = {
       if (user) {
         token.id = Number(user.id);
         token.email = user.email;
-        token.roles = user.roles;
+        token.roles = user.roles.map((role) => role.role.name);
         token.restaurantId = user.restaurantId;
       }
       return token;
     },
     async session({ session, token }) {
+      if (!token.id) return session;
+
       session.user.id = Number(token.id);
       session.user.email = token.email ?? "";
-      session.user.roles = token.roles as string[];
-      session.user.restaurantId = token.restaurantId as number | null;
+      session.user.roles = token.roles.map((role: any) => ({
+        role: {
+          name: role.role.name,
+          permissions: role.role.permissions.map((perm: any) => ({
+            permission: {
+              action: perm.permission.action,
+              subject: perm.permission.subject,
+            },
+          })),
+        },
+      }));
+      session.user.restaurantId = token.restaurantId;
 
       return session;
     },

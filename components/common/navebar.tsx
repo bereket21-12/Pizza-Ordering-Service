@@ -60,7 +60,7 @@ const Navbar = () => {
           'Content-Type': 'application/json',
         },
       });
-
+       signOut({ redirect: true, callbackUrl: "/login" });
       if (response.ok) {
         
         signOut({ redirect: true, callbackUrl: "/login" });

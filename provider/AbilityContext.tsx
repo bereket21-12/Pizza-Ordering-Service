@@ -1,6 +1,6 @@
 'use client'
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Ability, AbilityClass } from '@casl/ability';
+import { Ability} from '@casl/ability';
 import { defineDynamicAbilitiesFor } from '@/lib/ability';
 import { useSession, SessionContextValue } from 'next-auth/react';
 import { AppAbility } from '@/types/Appability';

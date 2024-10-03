@@ -53,7 +53,7 @@ const direct = (id:number) => {
 
   if (session?.user) {
     
-    router.push(`/customer/order?id=${id}`);
+   return  router.push(`/customer/order?id=${id}`);
   }
       router.push("/login")
     

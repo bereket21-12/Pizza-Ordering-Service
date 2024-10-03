@@ -4,7 +4,17 @@ import { DefaultUser } from "next-auth";
 declare module "next-auth" {
   interface User extends DefaultUser {
     id: number;
-    roles: string[];
+    roles: {
+      role: {
+        name: string;
+        permissions: {
+          permission: {
+            action: string;
+            subject: string;
+          };
+        }[];
+      };
+    }[];
     restaurantId: number | null;
   }
 
@@ -12,7 +22,17 @@ declare module "next-auth" {
     user: {
       id: number;
       email: string;
-      roles: string[];
+      roles: {
+        role: {
+          name: string;
+          permissions: {
+            permission: {
+              action: string;
+              subject: string;
+            };
+          }[];
+        };
+      }[];
       restaurantId: number | null;
     };
   }
