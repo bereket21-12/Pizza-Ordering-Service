@@ -27,11 +27,11 @@ model Role {
   id           Int              @id @default(autoincrement())
   name         String
   createdAt    DateTime         @default(now())
-  restaurantId Int
+  restaurantId Int?
   updatedAt    DateTime         @updatedAt
   parentRole   Role             @relation("RoleHierarchy", fields: [id], references: [id])
   roles        Role?            @relation("RoleHierarchy")
-  restaurant   Restaurant       @relation(fields: [restaurantId], references: [id])
+  restaurant   Restaurant?      @relation(fields: [restaurantId], references: [id])
   permissions  RolePermission[]
   users        UserRole[]
   User         User[]           @relation("UserRole")

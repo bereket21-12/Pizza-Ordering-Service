@@ -1,7 +1,7 @@
 'use client'
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Ability} from '@casl/ability';
-import { defineDynamicAbilitiesFor } from '@/lib/ability';
+import { Ability } from '@casl/ability';
+import { defineDynamicAbilitiesFor, transformSession } from '@/lib/ability';
 import { useSession, SessionContextValue } from 'next-auth/react';
 import { AppAbility } from '@/types/Appability';
 
@@ -12,9 +12,10 @@ export const AbilityProvider = ({ children }: { children: React.ReactNode }) => 
   const [ability, setAbility] = useState<AppAbility>(new Ability([]) as AppAbility);
 
   useEffect(() => {
-    if (status === 'authenticated') {
+    if (status === 'authenticated' && session) {
       const fetchAbilities = async () => {
-        const userAbility = await defineDynamicAbilitiesFor(session) as AppAbility;
+        const transformedSession = transformSession(session);
+        const userAbility = await defineDynamicAbilitiesFor(transformedSession) as AppAbility;
         console.log("Defined Abilities:", userAbility.rules); // Debug: Check what rules are being defined
         setAbility(userAbility);
       };

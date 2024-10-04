@@ -1,27 +1,11 @@
-import { DefaultUser } from "next-auth";
+import NextAuth from "next-auth";
 
-// Extend the DefaultUser type to include custom fields
 declare module "next-auth" {
-  interface User extends DefaultUser {
-    id: number;
-    roles: {
-      role: {
-        name: string;
-        permissions: {
-          permission: {
-            action: string;
-            subject: string;
-          };
-        }[];
-      };
-    }[];
-    restaurantId: number | null;
-  }
-
   interface Session {
     user: {
       id: number;
       email: string;
+      name?: string | null;
       roles: {
         role: {
           name: string;
@@ -36,12 +20,22 @@ declare module "next-auth" {
       restaurantId: number | null;
     };
   }
-}
 
-declare module "next-auth/jwt" {
-  interface JWT {
+  interface User {
     id: number;
-    roles: string[];
+    email: string;
+    name?: string | null;
+    roles: {
+      role: {
+        name: string;
+        permissions: {
+          permission: {
+            action: string;
+            subject: string;
+          };
+        }[];
+      };
+    }[];
     restaurantId: number | null;
   }
 }

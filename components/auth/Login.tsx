@@ -19,7 +19,7 @@ import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-
+import { getSession } from "next-auth/react";
 export default function Login() {
   const { data: session } = useSession();
   const router = useRouter();
@@ -45,21 +45,27 @@ export default function Login() {
       password: data.password,
       redirect: false,
     });
-console.log(result);
+
+    console.log(result);
+
     if (result?.error) {
-      
       setError("email", { type: "manual", message: result.error });
       setError("password", { type: "manual", message: result.error });
       toast.error("User name or password incorrect");
     } else {
+      reset();
+      clearErrors();
 
-      
-      reset(); 
-      clearErrors(); 
+      // Fetch the updated session
+      const session = await getSession();
+
       console.log(session?.user.roles[0]);
-    
-        router.push("/admin/adduser");  
-   
+
+      if (session?.user.roles[0]?.role?.name === "Super Admin") {
+        router.push("/admin/adduser");
+      } else {
+        router.push("/");
+      }
     }
   };
 

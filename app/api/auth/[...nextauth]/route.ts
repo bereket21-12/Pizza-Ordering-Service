@@ -19,26 +19,28 @@ const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials) return null;
 
-        // Fetch user with roles and permissions
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            password: true,
-            restaurantId: true,
-            roles: {
-              select: {
-                role: {
-                  select: {
-                    name: true,
-                    permissions: {
-                      select: {
-                        permission: {
-                          select: {
-                            action: true,
-                            subject: true,
+        try {
+          // Fetch user with roles and permissions
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              password: true,
+              restaurantId: true,
+              roles: {
+                select: {
+                  role: {
+                    select: {
+                      name: true,
+                      permissions: {
+                        select: {
+                          permission: {
+                            select: {
+                              action: true,
+                              subject: true,
+                            },
                           },
                         },
                       },
@@ -47,14 +49,25 @@ const authOptions: NextAuthOptions = {
                 },
               },
             },
-          },
-        });
+          });
 
-        // Check user password and map roles and permissions
-        if (
-          user &&
-          (await bcrypt.compare(credentials.password, user.password))
-        ) {
+          // If user is not found, return null
+          if (!user) {
+            console.log("User not found");
+            return null;
+          }
+
+          // Check user password
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+          if (!isPasswordValid) {
+            console.log("Invalid password");
+            return null;
+          }
+
+          // Map roles and permissions
           const rolesWithPermissions = user.roles.map((userRole) => ({
             role: {
               name: userRole.role.name,
@@ -74,8 +87,10 @@ const authOptions: NextAuthOptions = {
             roles: rolesWithPermissions,
             restaurantId: user.restaurantId,
           };
+        } catch (error) {
+          console.error("Error in authorize function:", error);
+          return null;
         }
-        return null;
       },
     }),
   ],
@@ -84,9 +99,9 @@ const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = Number(user.id);
+        token.id = user.id;
         token.email = user.email;
-        token.roles = user.roles.map((role) => role.role.name);
+        token.roles = user.roles;
         token.restaurantId = user.restaurantId;
       }
       return token;
@@ -96,18 +111,19 @@ const authOptions: NextAuthOptions = {
 
       session.user.id = Number(token.id);
       session.user.email = token.email ?? "";
-      session.user.roles = token.roles.map((role: any) => ({
-        role: {
-          name: role.role.name,
-          permissions: role.role.permissions.map((perm: any) => ({
-            permission: {
-              action: perm.permission.action,
-              subject: perm.permission.subject,
-            },
-          })),
-        },
-      }));
-      session.user.restaurantId = token.restaurantId;
+      session.user.roles =
+        (token.roles as {
+          role: {
+            name: string;
+            permissions: {
+              permission: {
+                action: string;
+                subject: string;
+              };
+            }[];
+          };
+        }[]) ?? [];
+      session.user.restaurantId = token.restaurantId as number | null;
 
       return session;
     },

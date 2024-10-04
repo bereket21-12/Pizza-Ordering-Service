@@ -6,44 +6,55 @@ import { PrismaClientInitializationError } from "@prisma/client/runtime/library"
 import bcrypt from "bcryptjs";
 
 export async function handleSignUp(previousState: any, formData: FormData) {
-  // Extract values from FormData
   const formValues = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
     confirmPassword: formData.get("confirmPassword") as string,
     location: formData.get("location") as string,
     phoneNumber: formData.get("phoneNumber") as string,
-    name: formData.get("name") as string | null, // Handle name as optional
+    name: formData.get("name") as string | null,
   };
   console.log("formValues", formValues);
-  // Validate the form values using the schema
+
   const results = signUpSchema.safeParse(formValues);
 
   if (!results.success) {
-    // Return structured errors in a way compatible with `useActionState`
     return { ...previousState, errors: results.error.flatten().fieldErrors };
   }
+  const customerPermission = await prisma.permission.create({
+    data: {
+      action: "read",
+      subject: "pizza",
+    },
+  });
+
+  const customerRole = await prisma.role.create({
+    data: {
+      name: "Customer",
+      permissions: {
+        create: {
+          permissionId: customerPermission.id,
+        },
+      },
+    },
+  });
 
   const { confirmPassword, password, email, ...userData } = formValues;
 
-  // Hash the password before saving it
-  const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds
-
-  // Create the user with hashed password
+  const hashedPassword = await bcrypt.hash(password, 10);
   try {
     const newUser = await createUser({
       ...userData,
       email,
       password: hashedPassword,
-    });
-    console.log("Submitted successfully", formValues);
-    await prisma.userRole.create({
-      data: {
-        userId: newUser.id,
-        roleId: 1, // The ID of the role to assign
+      roles: {
+        create: {
+          roleId: customerRole.id,
+        },
       },
     });
-    // Return the updated state after successful user creation
+    console.log("Submitted successfully", formValues);
+
     return { ...previousState, success: true, user: newUser };
   } catch (error) {
     console.error("Error creating user", error);
@@ -53,10 +64,8 @@ export async function handleSignUp(previousState: any, formData: FormData) {
 
 export async function handleGetAllPizzas() {
   try {
-    // Fetch all pizzas along with restaurant and topping details
     const pizzas = await getAllPizzas();
 
-    // Format the response for easier consumption
     const formattedPizzas = pizzas.map((pizza: any) => ({
       id: pizza.id,
       name: pizza.name,
@@ -134,7 +143,7 @@ export async function getOrders(id: number) {
           location: true,
           phoneNumber: true,
         },
-      }, // Includes user details in the result
+      },
       Pizza: true,
       status: true,
       toppings: {
@@ -146,7 +155,6 @@ export async function getOrders(id: number) {
           },
         },
       },
-      // Includes pizza details for each order
     },
   });
 

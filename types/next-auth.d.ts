@@ -5,8 +5,19 @@ declare module "next-auth" {
     user: {
       id: number;
       email: string;
-      roles: string[]; // Add roles as an array of strings
-      restaurantId: number | null; // Add restaurantId as nullable number
+      name?: string | null;
+      roles: {
+        role: {
+          name: string;
+          permissions: {
+            permission: {
+              action: string;
+              subject: string;
+            };
+          }[];
+        };
+      }[];
+      restaurantId: number | null;
     };
   }
 
@@ -14,7 +25,17 @@ declare module "next-auth" {
     id: number;
     email: string;
     name?: string | null;
-    roles: string[]; // Add roles as an array of strings
-    restaurantId: number | null; // Add restaurantId as nullable number
+    roles: {
+      role: {
+        name: string;
+        permissions: {
+          permission: {
+            action: string;
+            subject: string;
+          };
+        }[];
+      };
+    }[];
+    restaurantId: number | null;
   }
 }

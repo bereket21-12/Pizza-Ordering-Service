@@ -128,7 +128,7 @@ function Page() {
   }
 
   return (
-        <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center' }}><CircularProgress /></Box>}>
+        <Suspense fallback={<Box sx={{pt:20, display: 'flex', justifyContent: 'center' }}><CircularProgress /></Box>}>
 
     <Box sx={{ width: "100%", overflow: "hidden" }}>
       <Box
