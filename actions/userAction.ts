@@ -46,6 +46,7 @@ export async function handleSignUp(previousState: any, formData: FormData) {
     const newUser = await createUser({
       ...userData,
       email,
+      Active: true,
       password: hashedPassword,
       roles: {
         create: {
