@@ -117,11 +117,11 @@ const OrderHIstory: React.FC<PizzaMenuProps> = ({
         
         fontWeight: "bold",
         fontSize: "1.6rem",
-        color: status === "Delivered" ? "Green" : "#FFA500",
+        color: status === "DELIVERED" ? "Green" : "#FFA500",
         borderRadius: 2,
       }}
     >
-     {status==="Delivered" ? "Recevied" : "Ordered"}
+     {status==="DELIVERED" ? "Recevied" : "Ordered"}
     </Box>
         </Box>
 

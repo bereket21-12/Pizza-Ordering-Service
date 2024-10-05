@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Box, Button, Modal, TextField, Typography, MenuItem } from "@mui/material";
+import { Box, Button, Modal, TextField, Typography, MenuItem, IconButton, Switch } from "@mui/material";
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { getRole, createAdmin, getUserByRestaurant } from "@/actions/adminAction"; 
 import ReusableTable from "@/components/Dashboard/Reusable";
 import toast from "react-hot-toast";
@@ -34,15 +35,15 @@ const MyTable = () => {
     const id = Number(session?.user?.restaurantId); 
     const fetchRolesAndUsers = async () => {
       try {
-        // Fetch roles
+        
         const rolesData = await getRole();
         setRoles(rolesData);
 
-        // Fetch users with roles from the backend
         const usersData = await getUserByRestaurant(id);
         const transformedUsersData = usersData.map((user: any) => ({
           ...user,
-          role: user.roles[0]?.role.name || "", // Extract the role name from the nested roles array
+          role: user.roles[ 0 ]?.role.name || "", 
+          
         }));
         setUsers(transformedUsersData);
 
@@ -51,39 +52,47 @@ const MyTable = () => {
       }
     };
 
-    fetchRolesAndUsers(); // Call fetch function on mount
+    fetchRolesAndUsers(); 
   }, [session]);
 
-  // Define columns for the reusable table
-  const columns = [
+    const handleToggleActive = (userId: number, isActive: boolean) => {
+    setUsers((prevUsers) =>
+      prevUsers.map((user) =>
+        user.id === userId ? { ...user, isActive } : user
+      )
+    );
+  };
+  
+
+ const columns = [
     { accessorKey: "name", header: "Name" },
     { accessorKey: "email", header: "Email" },
     { accessorKey: "phoneNumber", header: "Phone Number" },
     {
       accessorKey: "actions",
       header: "Actions",
-      cell: (row: any) => (
-        <Box sx={{ backgroundColor: "black" }} display="flex" alignItems="center">
-          <Button
-            variant="outlined"
+      Cell: ({ row }: any) => (
+        <Box display="flex" alignItems="center">
+          <Typography  sx={{ ml: 1,fontSize:"0.8rem",color:row.original.isActive ?"green" : "red" }}>
+            {row.original.isActive ? "Active" : "Inactive"}
+          </Typography>
+          <Switch
+            checked={row.original.isActive}
+                onChange={() =>
+                  handleToggleActive(row.original.id, !row.original.isActive)
+                }
             color="primary"
-            onClick={() => handleViewUser(row.original)}
-          >
-            View
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={() => handleDeleteUser(row.original.id)}
-          >
-            Delete
-          </Button>
+          />
+        <IconButton sx={{color:"#FFA500"}} >
+          <VisibilityIcon />
+        </IconButton>
         </Box>
       ),
     },
   ];
 
-  // Handle form input changes
+
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -92,7 +101,7 @@ const MyTable = () => {
     }));
   };
 
-  // Handle role selection change
+  
   const handleRoleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -100,34 +109,35 @@ const MyTable = () => {
     }));
   };
 
-  // Handle form submission for creating a new user
+  
   const handleFormSubmit = async () => {
-    const formDataToSubmit = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      formDataToSubmit.append(key, value);
-    });
-    formDataToSubmit.append("restaurantId", "1"); // Hardcoded restaurant ID for now
+      const id = Number(session?.user?.restaurantId); 
+      const formDataToSubmit = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        formDataToSubmit.append(key, value);
+      });
+      formDataToSubmit.append("restaurantId", id.toString()); 
+  
+      try {
+        await createAdmin(formDataToSubmit);
+        setUsers((prev) => [
+          ...prev,
+          { ...formData, id: Math.random(), role: roles.find((r) => r.id.toString() === formData.role)?.name || "" },
+        ]); 
+        setOpen(false);
+        toast.success("User added successfully!");
+      } catch (error) {
+        console.error("Error creating user:", error);
+        toast.error("Failed to create user.");
+      }
+    };
 
-    try {
-      await createAdmin(formDataToSubmit);
-      setUsers((prev) => [
-        ...prev,
-        { ...formData, id: Math.random(), role: roles.find((r) => r.id.toString() === formData.role)?.name || "" },
-      ]); // Add user to state with role name
-      setOpen(false); // Close the modal after submission
-      toast.success("User added successfully!");
-    } catch (error) {
-      console.error("Error creating user:", error);
-      toast.error("Failed to create user.");
-    }
-  };
-
-  // Handle viewing a user
+  
   const handleViewUser = (user: UserData) => {
     console.log("Viewing user:", user);
   };
 
-  // Handle deleting a user
+  
   const handleDeleteUser = (id: number) => {
     setUsers((prev) => prev.filter((user) => user.id !== id));
     toast.success("User deleted successfully!");
@@ -139,9 +149,9 @@ const MyTable = () => {
         columns={columns}
         data={users}
         action="Add User"
-        onAdd={() => setOpen(true)} // Open the modal for adding a user
-        onEdit={(user) => console.log("Edit user:", user)} // Placeholder for edit logic
-        onDelete={handleDeleteUser} // Handle user deletion
+        onAdd={() => setOpen(true)} 
+        onEdit={(user) => console.log("Edit user:", user)} 
+        onDelete={handleDeleteUser} 
       />
 
       <Modal open={open} onClose={() => setOpen(false)}>

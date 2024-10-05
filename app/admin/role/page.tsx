@@ -1,4 +1,3 @@
-// RoleTable.tsx
 "use client";
 import React, { useState, useEffect } from "react";
 import {
@@ -10,18 +9,21 @@ import {
   FormGroup,
   Checkbox,
   Button,
+  Switch,
+  IconButton,
 } from "@mui/material";
 import { createRoleWithPermissions, getRole } from "@/actions/adminAction";
 import toast from "react-hot-toast"; 
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete"; 
 import ReusableTable from "@/components/Dashboard/Reusable"; 
+
 type RoleData = {
   id: number;
   name: string;
   createdAt: string;
   permissions: { action: string; subject: string }[];
-  isActive: boolean; // Track active/inactive status
+  isActive: boolean; 
 };
 
 const RoleTable = () => {
@@ -39,39 +41,64 @@ const RoleTable = () => {
     },
   });
 
-  // Define the permissions list
   const permissionsList = [
     { label: "Update Order Status", action: "Update", subject: "Order" },
     { label: "See Order", action: "read", subject: "Order" },
     { label: "Add User", action: "create", subject: "User" },
     { label: "See Customer", action: "read", subject: "Customer" },
     { label: "Create Role", action: "create", subject: "role" },
-
   ];
 
-  // Define columns for the reusable table
+  const handleToggleActive = (roleId: number, isActive: boolean) => {
+    setRoles((prevRoles) =>
+      prevRoles.map((role) =>
+        role.id === roleId ? { ...role, isActive } : role
+      )
+    );
+  };
+
   const columns = [
     { accessorKey: "name", header: "Role Name" },
     { accessorKey: "createdAt", header: "Created At" },
     {
       accessorKey: "actions",
       header: "Actions",
-      cell: (row:any) => (
+      Cell: ({ row }: any) => (
         <Box display="flex" alignItems="center">
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={() => handleViewRole(row.original)}
-          >
-            <VisibilityIcon />
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={() => handleDeleteRole(row.original.id)}
-          >
-            <DeleteIcon />
-          </Button>
+          {row.original && (
+            <>
+              <Typography
+                sx={{
+                  ml: 1,
+                  fontSize: "0.8rem",
+                  color: row.original.isActive ? "green" : "red",
+                }}
+              >
+                {row.original.isActive ? "Active" : "Inactive"}
+              </Typography>
+              <Switch
+                checked={row.original.isActive}
+                onChange={() =>
+                  handleToggleActive(row.original.id, !row.original.isActive)
+                }
+                sx={{color: row.original.isActive ? "green" : "red", fontSize:"0.7rem"}}
+                
+              />
+              <IconButton
+                sx={ { color:"#FFA500"} }
+                onClick={() => handleViewRole(row.original)}
+              >
+                <VisibilityIcon />
+              </IconButton>
+              <IconButton
+                sx={ { color:"black"} }
+                color="error"
+                onClick={() => handleDeleteRole(row.original.id)}
+              >
+                <DeleteIcon  />
+              </IconButton>
+            </>
+          )}
         </Box>
       ),
     },
@@ -82,13 +109,15 @@ const RoleTable = () => {
     const fetchRoles = async () => {
       try {
         const rolesData = await getRole(); // Fetch role data from the backend
-        setRoles(rolesData.map((role: any) => ({
-          id: role.id,
-          name: role.name,
-          createdAt: role.createdAt || new Date().toISOString(),
-          isActive: role.isActive,
-          permissions: role.permissions,
-        })));
+        setRoles(
+          rolesData.map((role: any) => ({
+            id: role.id,
+            name: role.name,
+            createdAt: role.createdAt || new Date().toISOString(),
+            isActive: role.isActive,
+            permissions: role.permissions,
+          }))
+        );
       } catch (error) {
         console.error("Failed to fetch roles:", error);
       }
@@ -129,7 +158,10 @@ const RoleTable = () => {
       });
 
     try {
-      const newRole = await createRoleWithPermissions(formData.name, selectedPermissions);
+      const newRole = await createRoleWithPermissions(
+        formData.name,
+        selectedPermissions
+      );
       setRoles((prevRoles) => [
         ...prevRoles,
         {
@@ -152,13 +184,11 @@ const RoleTable = () => {
   };
 
   return (
-    // <ProtectedRoute action={'create'} subject={'Role'} >
-
-    <Box sx={{pt:12,pr:1}}>
+    <Box sx={{ pt: 12, pr: 1 }}>
       <ReusableTable
         columns={columns}
         data={roles}
-        action='Add Role'
+        action="Add Role"
         onAdd={handleAddRole} // Pass the add handler
         onEdit={(role) => console.log("Edit role:", role)} // Example edit handler
         onDelete={handleDeleteRole} // Pass the delete handler
@@ -189,7 +219,9 @@ const RoleTable = () => {
             label="Role Name"
             name="name"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, name: e.target.value })
+            }
             fullWidth
           />
           <Typography variant="subtitle1">Permissions:</Typography>
@@ -201,13 +233,15 @@ const RoleTable = () => {
                   <Checkbox
                     name={`${action}${subject}`}
                     checked={!!formData.permissions[`${action}${subject}`]}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      permissions: {
-                        ...formData.permissions,
-                        [`${action}${subject}`]: e.target.checked,
-                      },
-                    })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        permissions: {
+                          ...formData.permissions,
+                          [`${action}${subject}`]: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 }
                 label={label}
@@ -230,8 +264,6 @@ const RoleTable = () => {
         </Box>
       </Modal>
     </Box>
-    // </ProtectedRoute>
-
   );
 };
 

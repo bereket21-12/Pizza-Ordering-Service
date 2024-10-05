@@ -65,7 +65,7 @@ if (!userId) {
           title={pizza.name} 
           toppings={pizza.toppings} 
           price={pizza.price} 
-          status={status} 
+          status={pizza.status} 
         />
       ))}
     </Box>

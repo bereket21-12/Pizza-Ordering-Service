@@ -10,7 +10,7 @@ import bcrypt from "bcryptjs";
 import { MenuSchema, restaurantSchema, signUpSchema } from "../utils/schema";
 import { uploadImage } from "./uploadImage";
 import prisma from "@/lib/prisma";
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus, User } from "@prisma/client";
 
 export async function handleCreateRestaurant(
   previousState: any,
@@ -540,7 +540,9 @@ export const getOrder = async (id: number) => {
       restaurantId: id,
     },
     select: {
+      id: true,
       quantity: true,
+      status: true,
       customer: {
         select: {
           name: true,
@@ -577,6 +579,24 @@ export const updateOrderStatus = async (
     },
     data: {
       status,
+    },
+  });
+};
+
+export const updateUser = async (id: number, active: boolean) => {
+  return await prisma.user.update({
+    where: {
+      id: id,
+    },
+    data: {
+      Active: active,
+    },
+  });
+};
+export const deleteRole = async (id: number) => {
+  return await prisma.role.delete({
+    where: {
+      id: id,
     },
   });
 };

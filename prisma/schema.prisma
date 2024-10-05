@@ -15,6 +15,7 @@ model User {
   location                                 String?
   phoneNumber                              String
   name                                     String?
+  Active                                   Boolean      @default(true)
   orders                                   Order[]
   superAdminRestaurants                    Restaurant[] @relation("SuperAdminRestaurants")
   Restaurant_User_restaurantIdToRestaurant Restaurant?  @relation("User_restaurantIdToRestaurant", fields: [restaurantId], references: [id])
@@ -27,6 +28,7 @@ model Role {
   id           Int              @id @default(autoincrement())
   name         String
   createdAt    DateTime         @default(now())
+  Active       Boolean          @default(true)
   restaurantId Int?
   updatedAt    DateTime         @updatedAt
   parentRole   Role             @relation("RoleHierarchy", fields: [id], references: [id])
