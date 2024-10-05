@@ -133,9 +133,7 @@ const MyTable = () => {
     };
 
   
-  const handleViewUser = (user: UserData) => {
-    console.log("Viewing user:", user);
-  };
+
 
   
   const handleDeleteUser = (id: number) => {
