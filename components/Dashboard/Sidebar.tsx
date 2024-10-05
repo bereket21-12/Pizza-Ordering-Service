@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState ,useEffect} from "react";
 import {
   AppBar,
   Toolbar,
@@ -70,6 +70,10 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
   const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
+ 
+  useEffect(()=>{
+
+  },[session])
   
   // Close the Menu
   const handleMenuClose = () => {
@@ -81,24 +85,12 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
   };
   const handleLogout = async () => {
     try {
-        nookies.destroy(null, "__Secure-next-auth.session-token", { path: "/", secure: true });
+      signOut({ redirect: true, callbackUrl: "/login" });
+   nookies.destroy(null, "__Secure-next-auth.session-token", { path: "/",secure: true });
     nookies.destroy(null, "next-auth.session-token", { path: "/", secure: true });
     nookies.destroy(null, "__Host-next-auth.csrf-token", { path: "/", secure: true });
     nookies.destroy(null, "__Secure-next-auth.callback-url", { path: "/", secure: true });
-      const response = await fetch('/api/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
 
-      if (response.ok) {
-        // Redirect or update UI after successful logout
-        signOut({ redirect: true, callbackUrl: "/login" });
-      } else {
-        const data = await response.json();
-        console.error(data.message); // Handle error
-      }
     } catch (error) {
       console.error('An error occurred during logout:', error);
     }
@@ -248,51 +240,46 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
         </Toolbar>
 
         {/* List with Icons */}
-        <List>
-        {menuItems.map((item, index) => (
-          ability.can('read', item.subject) && (
-            <ListItem
-              
-            key={index}
-            onClick={() => router.push(item.path)} // Handle route navigation
-            sx={{
-              cursor: "pointer",
-              position: "relative", // Required for the pseudo-element positioning
-              backgroundColor: isActive(item.path)
-                ? "#FF810066"
-                : "transparent", // Set active color
-              color: isActive(item.path) ? "#FF810066" : "inherit", // Change text color for active item
-              "&:hover": {
-                backgroundColor: "#FF810066", // Hover effect
-                color: "#FF8100",
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  left: "7px",
-                  top: "6px",
-                  bottom: "6px",
-                  width: "5px",
-                  backgroundColor: "#FF8100", // Orange color for the line
-                  }
-               
-              },
-            }}
-
-            
-          >
-            <ListItemIcon
-              sx={{
-               
-                color: isActive(item.path) ? "#FF810066" : "inherit",
-              }}
-            >
-              {item.icon}
-            </ListItemIcon>
-            <ListItemText primary={item.text} />
-          </ListItem>
-)))}
-
-        </List>
+<List>
+  {menuItems.map((item, index) => (
+    ability.can('read', item.subject) && (
+      <ListItem
+        key={index}
+        onClick={() => router.push(item.path)}
+        sx={{
+          "&::after": {
+            content: '""',
+            position: "absolute",
+            left: "7px",
+            top: "6px",
+            bottom: "6px",
+            width: "5px",
+            backgroundColor: isActive(item.path) ? "#FF8100" : "transparent", // Orange color for the line
+          },
+          cursor: "pointer",
+          position: "relative",
+          backgroundColor: isActive(item.path)
+            ? "#FF810066"
+            : "transparent",
+          color: isActive(item.path) ? "#FF8100" : "inherit",
+          "&:hover": {
+            backgroundColor: "#FF810066",
+            color: "#FF8100",
+          },
+        }}
+      >
+        <ListItemIcon
+          sx={{
+            color: isActive(item.path) ? "#FF810066" : "inherit",
+          }}
+        >
+          {item.icon}
+        </ListItemIcon>
+        <ListItemText primary={item.text} />
+      </ListItem>
+    )
+  ))}
+</List>
         <Box
           sx={{
             display: "flex",
