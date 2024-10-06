@@ -118,7 +118,6 @@ const ManageOrderPage: React.FC = () => {
   };
 
   const handleStatusClick = (orderId: number, status: string) => {
-    console.log("Setting selectedOrderId:", orderId); // Debugging log
     setSelectedOrderId(orderId);
     setSelectedStatus(status as OrderStatus);
     setOpenStatusModal(true);

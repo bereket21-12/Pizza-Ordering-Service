@@ -105,7 +105,7 @@ const Navbar = () => {
         background: "transparent",
       }}
     >
-      {/* Left side - Logo */}
+
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <IconButton size="large" edge="start" aria-label="menu" sx={{ mr: 2 }}>
           <Image
@@ -122,7 +122,7 @@ const Navbar = () => {
         </Typography>
       </Box>
 
-      {/* Center - Links for Desktop */}
+
       <Box
         sx={{
           display: { xs: "none", md: "flex" },
@@ -145,7 +145,7 @@ const Navbar = () => {
             Home
           </Button>
         </Link>
-        <Link href="/order_history" passHref>
+        <Link href="/customer/order_history" passHref>
           <Button
             sx={{
               color: "black",
@@ -160,7 +160,7 @@ const Navbar = () => {
             Order
           </Button>
         </Link>
-        <Link href="/who-we-are" passHref>
+        <Link href="" passHref>
           <Button
             sx={{
               color: "black",
@@ -197,7 +197,7 @@ const Navbar = () => {
                   Home
                 </Button>
               </Link>
-              <Link href="/order_history" passHref>
+              <Link href="/customer/order_history" passHref>
                 <Button
                   sx={{
                     color: "black",
@@ -241,7 +241,7 @@ const Navbar = () => {
             <Link href="/">
               <MenuItem onClick={handleMenuClose}>Home</MenuItem>
             </Link>
-            <Link href="/customer/order">
+            <Link href="/customer/order_history">
               <MenuItem onClick={handleMenuClose}>Order</MenuItem>
             </Link>
             <Link href="#">
@@ -275,7 +275,7 @@ const Navbar = () => {
                   Home
                 </Button>
               </Link>
-              <Link href="/order_history" passHref>
+              <Link href="/customer/order_history" passHref>
                 <Button
                   sx={{
                     color: "black",
@@ -305,8 +305,8 @@ const Navbar = () => {
                 onClose={handleMenuClose}
                 sx={{ mt: 1 }}
               >
-                <Link href="/customer/order">
-                  <MenuItem onClick={handleMenuClose}>Order</MenuItem>
+                <Link href="/customer/order_history">
+                  <MenuItem onClick={handleMenuClose}>Order_History</MenuItem>
                 </Link>
                 <Link href="/registerrestaurant">
                   <MenuItem onClick={handleMenuClose}>

@@ -23,6 +23,7 @@ import toast from "react-hot-toast";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ReusableTable from "@/components/Dashboard/Reusable";
+import { useSession } from "next-auth/react";
 
 type RoleData = {
   id: number;
@@ -47,7 +48,7 @@ const RolePage = () => {
       addRole: false,
     },
   });
-
+  const { data: sessoin } = useSession();
   const permissionsList = [
     { label: "Update Order Status", action: "Update", subject: "Order" },
     { label: "See Order", action: "read", subject: "Order" },
@@ -134,7 +135,14 @@ const RolePage = () => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const rolesData = await getRole();
+        const restaurantId = sessoin?.user.restaurantId;
+        if (typeof restaurantId === "number") {
+          const rolesData = await getRole(restaurantId);
+        } else {
+          console.error("Invalid restaurant ID");
+          return;
+        }
+        const rolesData = await getRole(restaurantId);
         setRoles(
           rolesData.map((role: any) => ({
             id: role.id,
@@ -225,7 +233,14 @@ const RolePage = () => {
     } else {
       const fetchRoles = async () => {
         try {
-          const rolesData = await getRole();
+          const restaurantId = sessoin?.user.restaurantId || 0;
+          if (typeof restaurantId === "number") {
+            const rolesData = await getRole(restaurantId);
+          } else {
+            console.error("Invalid restaurant ID");
+          }
+          const rolesData = await getRole(restaurantId);
+
           setRoles(
             rolesData.map((role: any) => ({
               id: role.id,

@@ -164,14 +164,12 @@ export default function Login() {
           </Box>
         ))}
 
-        {/* Remember Me Checkbox */}
         <FormControlLabel
           control={<Checkbox />}
           label="Remember Me"
           sx={{ alignSelf: "flex-start" }}
         />
 
-        {/* Login Button */}
         <Button
           type="submit"
           variant="contained"

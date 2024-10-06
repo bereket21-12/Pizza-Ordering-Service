@@ -50,7 +50,7 @@ const MyTable = () => {
     const id = Number(session?.user?.restaurantId);
     const fetchRolesAndUsers = async () => {
       try {
-        const rolesData = await getRole();
+        const rolesData = await getRole(id);
         setRoles(rolesData);
 
         const usersData = await getUserByRestaurant(id);

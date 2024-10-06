@@ -418,8 +418,11 @@ export const getUserRolesAndPermissions = async (userId: number) => {
   return userWithRoles;
 };
 
-export const getRole = async () => {
+export const getRole = async (id: number) => {
   return await prisma.role.findMany({
+    where: {
+      restaurantId: id,
+    },
     select: {
       name: true,
       id: true,
