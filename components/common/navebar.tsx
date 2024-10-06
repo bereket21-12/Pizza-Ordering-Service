@@ -4,11 +4,17 @@ import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Image from "next/image";
 import Link from "next/link";
-import { Button, Menu, MenuItem, Typography, useMediaQuery } from "@mui/material";
+import {
+  Button,
+  Menu,
+  MenuItem,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import { useSession, signOut } from "next-auth/react";
 import Avatar from "@mui/material/Avatar";
-import MenuIcon from '@mui/icons-material/Menu';
-import nookies from 'nookies';
+import MenuIcon from "@mui/icons-material/Menu";
+import nookies from "nookies";
 
 function stringToColor(string: string) {
   let hash = 0;
@@ -33,9 +39,10 @@ function stringAvatar(name: string) {
 
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [mobileMenuAnchorEl, setMobileMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [mobileMenuAnchorEl, setMobileMenuAnchorEl] =
+    useState<null | HTMLElement>(null);
   const { data: session } = useSession();
-  const isMobile = useMediaQuery('(max-width:600px)');
+  const isMobile = useMediaQuery("(max-width:600px)");
 
   const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -48,14 +55,26 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      nookies.destroy(null, "__Secure-next-auth.session-token", { path: "/", secure: true });
-      nookies.destroy(null, "next-auth.session-token", { path: "/", secure: true });
-      nookies.destroy(null, "__Host-next-auth.csrf-token", { path: "/", secure: true });
-      nookies.destroy(null, "__Secure-next-auth.callback-url", { path: "/", secure: true });
-      const response = await fetch('/api/logout', {
-        method: 'POST',
+      nookies.destroy(null, "__Secure-next-auth.session-token", {
+        path: "/",
+        secure: true,
+      });
+      nookies.destroy(null, "next-auth.session-token", {
+        path: "/",
+        secure: true,
+      });
+      nookies.destroy(null, "__Host-next-auth.csrf-token", {
+        path: "/",
+        secure: true,
+      });
+      nookies.destroy(null, "__Secure-next-auth.callback-url", {
+        path: "/",
+        secure: true,
+      });
+      const response = await fetch("/api/logout", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
       signOut({ redirect: true, callbackUrl: "/login" });
@@ -63,10 +82,10 @@ const Navbar = () => {
         signOut({ redirect: true, callbackUrl: "/login" });
       } else {
         const data = await response.json();
-        console.error(data.message); // Handle error
+        console.error(data.message);
       }
     } catch (error) {
-      console.error('An error occurred during logout:', error);
+      console.error("An error occurred during logout:", error);
     }
   };
 
@@ -126,7 +145,7 @@ const Navbar = () => {
             Home
           </Button>
         </Link>
-                <Link href="/order_history" passHref>
+        <Link href="/order_history" passHref>
           <Button
             sx={{
               color: "black",
@@ -178,21 +197,21 @@ const Navbar = () => {
                   Home
                 </Button>
               </Link>
-        <Link href="/order_history" passHref>
-          <Button
-            sx={{
-              color: "black",
-              fontSize: { xs: "1rem", md: "1.2rem" },
-              fontWeight: "bold",
-              textDecoration: "none",
-              "&:hover": {
-                color: "#FFA500",
-              },
-            }}
-          >
-            Order
-          </Button>
-        </Link>
+              <Link href="/order_history" passHref>
+                <Button
+                  sx={{
+                    color: "black",
+                    fontSize: { xs: "1rem", md: "1.2rem" },
+                    fontWeight: "bold",
+                    textDecoration: "none",
+                    "&:hover": {
+                      color: "#FFA500",
+                    },
+                  }}
+                >
+                  Order
+                </Button>
+              </Link>
               <IconButton
                 onClick={handleAvatarClick}
                 sx={{ color: "black" }}
@@ -290,7 +309,9 @@ const Navbar = () => {
                   <MenuItem onClick={handleMenuClose}>Order</MenuItem>
                 </Link>
                 <Link href="/registerrestaurant">
-                  <MenuItem onClick={handleMenuClose}>Register Restaurant</MenuItem>
+                  <MenuItem onClick={handleMenuClose}>
+                    Register Restaurant
+                  </MenuItem>
                 </Link>
                 <Link href="/signup">
                   <MenuItem onClick={handleMenuClose}>Register Self</MenuItem>
@@ -322,7 +343,9 @@ const Navbar = () => {
                 sx={{ mt: 1 }}
               >
                 <Link href="/registerrestaurant">
-                  <MenuItem onClick={handleMenuClose}>Register Restaurant</MenuItem>
+                  <MenuItem onClick={handleMenuClose}>
+                    Register Restaurant
+                  </MenuItem>
                 </Link>
                 <Link href="/signup">
                   <MenuItem onClick={handleMenuClose}>Register Self</MenuItem>

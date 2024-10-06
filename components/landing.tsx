@@ -24,18 +24,18 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
         gap: 1,
         paddingTop: 4,
         position: "relative",
-        overflow: "hidden", 
-        alignItems: "center", 
-        background: "linear-gradient(180deg, #FFFFFF 0%, #FFC993 76%, #FFF8F1 100%)",
+        overflow: "hidden",
+        alignItems: "center",
+        background:
+          "linear-gradient(180deg, #FFFFFF 0%, #FFC993 76%, #FFF8F1 100%)",
       }}
     >
-      {/* Left side: Text and Search Bar */}
       <Box
         sx={{
           flex: 1,
           paddingLeft: { xs: 2, md: 12 },
           width: { xs: "50%", md: "90%" },
-          zIndex: 2, 
+          zIndex: 2,
         }}
       >
         <Box
@@ -49,8 +49,8 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
           <Typography
             sx={{
               fontWeight: "bold",
-              fontSize: { xs: "3.5rem", sm: "4.5rem", md: "6rem" }, 
-              mb: 1, 
+              fontSize: { xs: "3.5rem", sm: "4.5rem", md: "6rem" },
+              mb: 1,
             }}
             variant="h3"
           >
@@ -59,8 +59,8 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
         </Box>
         <Typography
           sx={{
-            fontSize: { xs: "0.8rem", sm: "1rem", md: "1.1rem" }, 
-            mb: 2, 
+            fontSize: { xs: "0.8rem", sm: "1rem", md: "1.1rem" },
+            mb: 2,
           }}
         >
           Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dolor
@@ -117,17 +117,15 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
         </FormControl>
       </Box>
 
-      {/* Right side: Overlapping Images */}
       <Box
         sx={{
           position: "relative",
           width: { xs: "50%", md: "90%" },
-          height: "70vh", 
+          height: "70vh",
           right: "-30%",
-          zIndex: 1, 
+          zIndex: 1,
         }}
       >
-        {/* Leaf Image */}
         <Box
           sx={{
             position: "absolute",
@@ -141,17 +139,16 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
           <Image
             src={"/leave.png"}
             layout="fill"
-            objectFit="contain" 
+            objectFit="contain"
             alt="leave"
             style={{
-              transform: "scale(1.1)", 
-              transformOrigin: "center", 
-              zIndex: 1, 
+              transform: "scale(1.1)",
+              transformOrigin: "center",
+              zIndex: 1,
             }}
           />
         </Box>
 
-        {/* Pizza Image */}
         <Box
           sx={{
             position: "absolute",
@@ -159,17 +156,17 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
             height: "100%",
             top: 0,
             left: 0,
-            zIndex: 2, 
+            zIndex: 2,
           }}
         >
           <Image
             src={"/Image (1).png"}
-            layout="fill" 
-            objectFit="contain" 
+            layout="fill"
+            objectFit="contain"
             alt="pizza"
             style={{
-              transform: "scale(1.2)", 
-              transformOrigin: "center", 
+              transform: "scale(1.2)",
+              transformOrigin: "center",
             }}
           />
         </Box>

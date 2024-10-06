@@ -1,8 +1,16 @@
-'use client';
+"use client";
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Box, TextField, Typography, FormControlLabel, Checkbox, CircularProgress, IconButton } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Typography,
+  FormControlLabel,
+  Checkbox,
+  CircularProgress,
+  IconButton,
+} from "@mui/material";
 import Image from "next/image";
 import LoadingButton from "@mui/lab/LoadingButton";
 import Link from "next/link";
@@ -15,7 +23,9 @@ export default function SignUp() {
   const router = useRouter();
   const [state, dispatch, ispending] = useActionStateCompat(handleSignUp, null);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
+  async function handleSubmit(
+    event: React.FormEvent<HTMLFormElement>
+  ): Promise<void> {
     event.preventDefault();
     if (!ref.current) return;
 
@@ -32,7 +42,6 @@ export default function SignUp() {
     }
   }
 
-  // Use `useEffect` to handle state changes safely
   useEffect(() => {
     if (state?.error) {
       toast.error(state.error);
@@ -46,7 +55,7 @@ export default function SignUp() {
     <Box
       ref={ref}
       component="form"
-      onSubmit={handleSubmit} // Use handleSubmit to trigger server action
+      onSubmit={handleSubmit}
       method="post"
       sx={{
         display: "flex",
@@ -69,7 +78,12 @@ export default function SignUp() {
           width: { xs: "100%", md: "50%" },
         }}
       >
-        <Image src={"/emojione_pizza.png"} width={150} height={150} alt="pizza_img" />
+        <Image
+          src={"/emojione_pizza.png"}
+          width={150}
+          height={150}
+          alt="pizza_img"
+        />
       </Box>
 
       {/* Right Input Fields Box */}
@@ -85,24 +99,54 @@ export default function SignUp() {
           px: 2,
         }}
       >
-        <Box sx={{ display: "flex", flexDirection: "row", pr: { xs: 0, md: 39 }, alignItems: "center" }}>
-          <IconButton size="large" edge="start" aria-label="menu" sx={{ mr: 2, alignSelf: "flex-start" }}>
-            <Image width={40} height={40} src={"/emojione_pizza.png"} alt={"Pizza Logo"} />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            pr: { xs: 0, md: 39 },
+            alignItems: "center",
+          }}
+        >
+          <IconButton
+            size="large"
+            edge="start"
+            aria-label="menu"
+            sx={{ mr: 2, alignSelf: "flex-start" }}
+          >
+            <Image
+              width={40}
+              height={40}
+              src={"/emojione_pizza.png"}
+              alt={"Pizza Logo"}
+            />
           </IconButton>
-          <Typography sx={{ fontWeight: "bold", fontSize: "1.5rem", color: "#AF5901" }}>Pizza</Typography>
+          <Typography
+            sx={{ fontWeight: "bold", fontSize: "1.5rem", color: "#AF5901" }}
+          >
+            Pizza
+          </Typography>
         </Box>
         {/* Input Fields */}
         {[
           { label: "Full Name", name: "name", type: "text" },
           { label: "Email Address", name: "email", type: "email" },
           { label: "Password", name: "password", type: "password" },
-          { label: "Confirm Password", name: "confirmPassword", type: "password" },
+          {
+            label: "Confirm Password",
+            name: "confirmPassword",
+            type: "password",
+          },
           { label: "Location", name: "location", type: "text" },
           { label: "Phone Number", name: "phoneNumber", type: "number" },
         ].map(({ label, name, type }) => (
           <Box key={name} sx={{ width: { xs: "100%", md: 450 }, height: 80 }}>
             <TextField
-              sx={{ width: "100%", display: "flex", gap: 1, flexDirection: "column" }}
+              sx={{
+                width: "100%",
+                display: "flex",
+                gap: 1,
+                flexDirection: "column",
+              }}
               label={label}
               type={type}
               name={name}
@@ -113,7 +157,11 @@ export default function SignUp() {
         ))}
 
         {/* Remember Me Checkbox */}
-        <FormControlLabel control={<Checkbox name="acceptTerms" />} label="I accept terms and conditions" sx={{ alignSelf: "flex-start" }} />
+        <FormControlLabel
+          control={<Checkbox name="acceptTerms" />}
+          label="I accept terms and conditions"
+          sx={{ alignSelf: "flex-start" }}
+        />
 
         {/* Sign Up Button */}
         <LoadingButton
@@ -143,17 +191,40 @@ export default function SignUp() {
           {ispending ? "Signing Up..." : "Sign Up"}
         </LoadingButton>
 
-        <Typography sx={{ fontWeight: "italic", fontSize: "0.85rem", color: "black", alignSelf: "center" }}>
+        <Typography
+          sx={{
+            fontWeight: "italic",
+            fontSize: "0.85rem",
+            color: "black",
+            alignSelf: "center",
+          }}
+        >
           Already have an account?{" "}
           <span style={{ color: "#FFA500" }}>
-            <Link style={{ color: "#FFA500", textDecoration: "none" }} href={'/login'}>
+            <Link
+              style={{ color: "#FFA500", textDecoration: "none" }}
+              href={"/login"}
+            >
               Login
             </Link>
           </span>
         </Typography>
 
-        {state?.success && <Typography sx={{ fontWeight: "bold", fontSize: "1rem", color: "green" }}>Sign Up Successful!</Typography>}
-        {state?.error && <Typography sx={{ fontWeight: "italic", fontSize: "1rem", color: "red" }}> Error : {state.error}</Typography>}
+        {state?.success && (
+          <Typography
+            sx={{ fontWeight: "bold", fontSize: "1rem", color: "green" }}
+          >
+            Sign Up Successful!
+          </Typography>
+        )}
+        {state?.error && (
+          <Typography
+            sx={{ fontWeight: "italic", fontSize: "1rem", color: "red" }}
+          >
+            {" "}
+            Error : {state.error}
+          </Typography>
+        )}
       </Box>
     </Box>
   );

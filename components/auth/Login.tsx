@@ -13,7 +13,7 @@ import toast from "react-hot-toast";
 import Image from "next/image";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { loginSchema } from "@/utils/schema"; 
+import { loginSchema } from "@/utils/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
@@ -54,7 +54,6 @@ export default function Login() {
       reset();
       clearErrors();
 
-      // Fetch the updated session
       const session = await getSession();
 
       console.log(session?.user.roles[0]);
@@ -199,12 +198,13 @@ export default function Login() {
         >
           Don&apos;t have an account?{" "}
           <span style={{ color: "#FFA500" }}>
-            
-          <Link style={{color:"#FFA500",textDecoration:"none"}} href={'/signup'}>
-            
-          Sign Up
-          </Link>
-            </span>
+            <Link
+              style={{ color: "#FFA500", textDecoration: "none" }}
+              href={"/signup"}
+            >
+              Sign Up
+            </Link>
+          </span>
         </Typography>
       </Box>
     </Box>

@@ -71,8 +71,8 @@ export default function TopRestaurant({ restaurants }: TopRestaurantProps) {
                 display: "flex",
                 flexDirection: "row",
                 gap: 1,
-                width: "90%", // Reduce the width a bit
-                height: "auto", // Allow the height to adjust based on content
+                width: "90%",
+                height: "auto",
                 borderRadius: 2,
               }}
             >

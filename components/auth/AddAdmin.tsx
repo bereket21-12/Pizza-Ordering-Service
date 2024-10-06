@@ -26,12 +26,11 @@ function AddMenu() {
     "Olives"
   ]);
 
-  // Handler to add new text field for toppings
+  
   const handleAddTopping = () => {
     setExtraToppings([...extraToppings, ""]);
   };
 
-  // Handler to toggle checkbox selection for predefined toppings
   const handleCheckboxChange = (topping: string) => {
     setCheckedToppings((prev) =>
       prev.includes(topping) ? prev.filter((t) => t !== topping) : [...prev, topping]
@@ -45,12 +44,12 @@ function AddMenu() {
       name: formData.get('Name') as string,
       price: formData.get('Price') as string,
       toppings: [
-        ...checkedToppings, // Include selected predefined toppings
-        ...extraToppings.filter((topping) => topping.trim() !== ""), // Include non-empty custom toppings
+        ...checkedToppings, 
+        ...extraToppings.filter((topping) => topping.trim() !== ""), 
       ],
     };
     console.log('Form submitted:', data);
-    // Add further logic to handle form submission (e.g., sending data to the server).
+
   }
 
   return (

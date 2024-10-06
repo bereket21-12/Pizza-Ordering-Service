@@ -12,13 +12,13 @@ import {
 import Menu_footer from "./menu_footer";
 
 interface PizzaMenuProps {
-  image: string; // Image URL for the pizza
-  title: string; // Pizza name/title
-  toppings: string[]; // List of toppings
-  price: number; // Price of the pizza
-  restaurantName: string; // Restaurant name
-  footerImage: string; // Footer image (optional)
-  onOrder: () => void; // Action for order button
+  image: string;
+  title: string;
+  toppings: string[];
+  price: number;
+  restaurantName: string;
+  footerImage: string;
+  onOrder: () => void;
 }
 
 const PizzaMenu: React.FC<PizzaMenuProps> = ({
@@ -43,28 +43,28 @@ const PizzaMenu: React.FC<PizzaMenuProps> = ({
       {/* Ellipse-shaped background with image on top */}
       <Box
         sx={{
-          width: 300, // Ellipse width
-          height: 300, // Ellipse height (to make it a dish-like circle)
-          mx: "auto", // Center horizontally
-          mt: 2, // Margin on top
-          position: "relative", // Allows absolute positioning of the image
-          backgroundColor: "#FFF8F1", // Dish background color
-          borderRadius: "50%", // Makes it a circle
+          width: 300,
+          height: 300,
+          mx: "auto",
+          mt: 2,
+          position: "relative",
+          backgroundColor: "#FFF8F1",
+          borderRadius: "50%",
         }}
       >
         {/* Image on top of the ellipse (the pizza) */}
         <Box
           component="img"
-          src={image} // Use the passed image prop
-          alt={title} // Use the title prop for the alt text
+          src={image}
+          alt={title}
           sx={{
-            width: 250, // Adjust size of pizza image
+            width: 250,
             height: 250,
-            position: "absolute", // Position inside the circle
-            top: "50%", // Center vertically
-            left: "50%", // Center horizontally
-            transform: "translate(-50%, -50%)", // Adjust for centering
-            borderRadius: "50%", // Make it a circle
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            borderRadius: "50%",
           }}
         />
       </Box>
@@ -77,7 +77,7 @@ const PizzaMenu: React.FC<PizzaMenuProps> = ({
             alignSelf: "flex-start",
           }}
         >
-          {title} {/* Use the passed title prop */}
+          {title}
         </Typography>
 
         {/* Dynamically generate toppings */}
@@ -119,21 +119,21 @@ const PizzaMenu: React.FC<PizzaMenuProps> = ({
             </sup>
           </Typography>
           <Button
-          onClick={onOrder}
-      variant="contained"
-      sx={{
-        backgroundColor: "#FFA500",
-        fontWeight: "bold",
-        fontSize: "1.2rem",
-        color: "white",
-        "&:hover": {
-          backgroundColor: "#FF8C00",
-        },
-        borderRadius: 2,
-      }}
-    >
-     Order
-    </Button>
+            onClick={onOrder}
+            variant="contained"
+            sx={{
+              backgroundColor: "#FFA500",
+              fontWeight: "bold",
+              fontSize: "1.2rem",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#FF8C00",
+              },
+              borderRadius: 2,
+            }}
+          >
+            Order
+          </Button>
         </Box>
 
         <Divider />

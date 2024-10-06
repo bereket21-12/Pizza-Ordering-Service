@@ -15,14 +15,14 @@ export default function Footer() {
   return (
     <Box
       sx={{
-        p: 2, // Reduced padding to ensure the input fits
+        p: 2,
         mb: 0,
         width: "100%",
-        height: { xs: "auto", md: 150 }, // Set to auto on small screens to accommodate dynamic content
+        height: { xs: "auto", md: 150 },
         display: "flex",
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center", // Center align items vertically
+        alignItems: "center",
         backgroundColor: "#CCB691",
       }}
     >
@@ -44,7 +44,7 @@ export default function Footer() {
         sx={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center", // Center align items in this section
+          alignItems: "center",
         }}
       >
         <Box
@@ -53,18 +53,16 @@ export default function Footer() {
             flexDirection: "row",
             gap: 2,
             alignItems: "center",
-            mb: 1, // Add margin below for spacing
+            mb: 1,
           }}
         >
           <Image height={50} width={50} alt="icon" src={"/pizzaLogo.png"} />{" "}
-          {/* Adjusted logo size */}
           <Typography>Pizza</Typography>
         </Box>
 
-        {/* Input Field Section */}
         <FormControl
           sx={{
-            width: { xs: "90%", sm: "80%", md: "45ch" }, // Responsive width
+            width: { xs: "90%", sm: "80%", md: "45ch" },
           }}
           variant="filled"
         >

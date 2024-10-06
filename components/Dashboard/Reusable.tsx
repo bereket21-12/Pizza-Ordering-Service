@@ -18,9 +18,7 @@ const ReusableTable = <DataType,>({
   onAdd,
   action,
 }: ReusableTableProps<DataType>) => {
-  const [searchQuery, setSearchQuery] = useState(""); // State for search query
-
-  // Filter the data manually based on the search query
+  const [searchQuery, setSearchQuery] = useState("");
   const filteredData = data.filter((row: any) =>
     Object.values(row).some((value) =>
       String(value).toLowerCase().includes(searchQuery.toLowerCase())
@@ -30,33 +28,33 @@ const ReusableTable = <DataType,>({
   return (
     <div>
       <MaterialReactTable
-      columns={columns}
-      data={filteredData}
-      manualFiltering
-      state={{
-        globalFilter: searchQuery,
-      }}
-      onGlobalFilterChange={(value: string) => setSearchQuery(value)}
-      renderTopToolbarCustomActions={() => (
-        <Box display="flex" justifyContent="space-between" gap={2}>
-        {/* Add Role Button */}
-        {action && 
-        <Button
-          variant="contained"
-          sx={{
-          backgroundColor: "#FFA500",
-          color: "white",
-          "&:hover": {
-            backgroundColor: "#e69500",
-          },
-          }}
-          onClick={onAdd}
-        >
-          {action}
-        </Button>
-        }
-        </Box>
-      )}
+        columns={columns}
+        data={filteredData}
+        manualFiltering
+        state={{
+          globalFilter: searchQuery,
+        }}
+        onGlobalFilterChange={(value: string) => setSearchQuery(value)}
+        renderTopToolbarCustomActions={() => (
+          <Box display="flex" justifyContent="space-between" gap={2}>
+            {/* Add Role Button */}
+            {action && (
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: "#FFA500",
+                  color: "white",
+                  "&:hover": {
+                    backgroundColor: "#e69500",
+                  },
+                }}
+                onClick={onAdd}
+              >
+                {action}
+              </Button>
+            )}
+          </Box>
+        )}
       />
     </div>
   );

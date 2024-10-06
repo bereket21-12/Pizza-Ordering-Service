@@ -1,8 +1,22 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Box, Button, Modal, TextField, Typography, MenuItem, IconButton, Switch } from "@mui/material";
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import { getRole, createAdmin, getUserByRestaurant, searchUser } from "@/actions/adminAction"; 
+import {
+  Box,
+  Button,
+  Modal,
+  TextField,
+  Typography,
+  MenuItem,
+  IconButton,
+  Switch,
+} from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import {
+  getRole,
+  createAdmin,
+  getUserByRestaurant,
+  searchUser,
+} from "@/actions/adminAction";
 import ReusableTable from "@/components/Dashboard/Reusable";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
@@ -13,15 +27,15 @@ type UserData = {
   email: string;
   location: string | null;
   phoneNumber: string;
-  role: string; 
+  role: string;
 };
 
 const MyTable = () => {
-  const { data: session } = useSession(); 
-  const [open, setOpen] = useState(false); 
-  const [users, setUsers] = useState<UserData[]>([]); 
-  const [roles, setRoles] = useState<{ id: number; name: string }[]>([]); 
-  const [searchQuery, setSearchQuery] = useState("");
+  const { data: session } = useSession();
+  const [open, setOpen] = useState(false);
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [roles, setRoles] = useState<{ id: number; name: string }[]>([]);
+  const [searchQuery] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -33,7 +47,7 @@ const MyTable = () => {
   });
 
   useEffect(() => {
-    const id = Number(session?.user?.restaurantId); 
+    const id = Number(session?.user?.restaurantId);
     const fetchRolesAndUsers = async () => {
       try {
         const rolesData = await getRole();
@@ -42,7 +56,7 @@ const MyTable = () => {
         const usersData = await getUserByRestaurant(id);
         const transformedUsersData = usersData.map((user: any) => ({
           ...user,
-          role: user.roles[0]?.role.name || "", 
+          role: user.roles[0]?.role.name || "",
         }));
         setUsers(transformedUsersData);
       } catch (error) {
@@ -50,20 +64,20 @@ const MyTable = () => {
       }
     };
 
-    fetchRolesAndUsers(); 
+    fetchRolesAndUsers();
   }, [session]);
 
   useEffect(() => {
     if (searchQuery) {
       handleSearch(searchQuery);
     } else {
-      const id = Number(session?.user?.restaurantId); 
+      const id = Number(session?.user?.restaurantId);
       const fetchUsers = async () => {
         try {
           const usersData = await getUserByRestaurant(id);
           const transformedUsersData = usersData.map((user: any) => ({
             ...user,
-            role: user.roles[0]?.role.name || "", 
+            role: user.roles[0]?.role.name || "",
           }));
           setUsers(transformedUsersData);
         } catch (error) {
@@ -80,7 +94,7 @@ const MyTable = () => {
       const searchResults = await searchUser(query);
       const transformedSearchResults = searchResults.map((user: any) => ({
         ...user,
-        role: user.roles[0]?.role.name || "", 
+        role: user.roles[0]?.role.name || "",
       }));
       setUsers(transformedSearchResults);
     } catch (error) {
@@ -105,7 +119,13 @@ const MyTable = () => {
       header: "Actions",
       Cell: ({ row }: any) => (
         <Box display="flex" alignItems="center">
-          <Typography sx={{ ml: 1, fontSize: "0.8rem", color: row.original.isActive ? "green" : "red" }}>
+          <Typography
+            sx={{
+              ml: 1,
+              fontSize: "0.8rem",
+              color: row.original.isActive ? "green" : "red",
+            }}
+          >
             {row.original.isActive ? "Active" : "Inactive"}
           </Typography>
           <Switch
@@ -139,19 +159,24 @@ const MyTable = () => {
   };
 
   const handleFormSubmit = async () => {
-    const id = Number(session?.user?.restaurantId); 
+    const id = Number(session?.user?.restaurantId);
     const formDataToSubmit = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       formDataToSubmit.append(key, value);
     });
-    formDataToSubmit.append("restaurantId", id.toString()); 
+    formDataToSubmit.append("restaurantId", id.toString());
 
     try {
       await createAdmin(formDataToSubmit);
       setUsers((prev) => [
         ...prev,
-        { ...formData, id: Math.random(), role: roles.find((r) => r.id.toString() === formData.role)?.name || "" },
-      ]); 
+        {
+          ...formData,
+          id: Math.random(),
+          role:
+            roles.find((r) => r.id.toString() === formData.role)?.name || "",
+        },
+      ]);
       setOpen(false);
       toast.success("User added successfully!");
     } catch (error) {
@@ -167,14 +192,13 @@ const MyTable = () => {
 
   return (
     <Box sx={{ pt: 12, pr: 1 }}>
-
       <ReusableTable
         columns={columns}
         data={users}
         action="Add User"
-        onAdd={() => setOpen(true)} 
-        onEdit={(user) => console.log("Edit user:", user)} 
-        onDelete={handleDeleteUser} 
+        onAdd={() => setOpen(true)}
+        onEdit={(user) => console.log("Edit user:", user)}
+        onDelete={handleDeleteUser}
       />
 
       <Modal open={open} onClose={() => setOpen(false)}>
@@ -197,21 +221,75 @@ const MyTable = () => {
           <Typography variant="h6" gutterBottom>
             Add New User
           </Typography>
-          <TextField label="Name" name="name" value={formData.name} onChange={handleInputChange} fullWidth />
-          <TextField label="Email" name="email" value={formData.email} onChange={handleInputChange} fullWidth />
-          <TextField label="Location" name="location" value={formData.location} onChange={handleInputChange} fullWidth />
-          <TextField label="Phone Number" name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} fullWidth />
-          <TextField label="Password" name="password" type="password" value={formData.password} onChange={handleInputChange} fullWidth />
-          <TextField label="Confirm Password" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleInputChange} fullWidth />
+          <TextField
+            label="Name"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <TextField
+            label="Email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <TextField
+            label="Location"
+            name="location"
+            value={formData.location}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <TextField
+            label="Phone Number"
+            name="phoneNumber"
+            value={formData.phoneNumber}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <TextField
+            label="Password"
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <TextField
+            label="Confirm Password"
+            name="confirmPassword"
+            type="password"
+            value={formData.confirmPassword}
+            onChange={handleInputChange}
+            fullWidth
+          />
           <Box display="flex" flexDirection="row" gap={2} alignItems="center">
-            <TextField label="Role" name="role" value={formData.role} onChange={handleRoleChange} select sx={{ flex: 1 }}>
+            <TextField
+              label="Role"
+              name="role"
+              value={formData.role}
+              onChange={handleRoleChange}
+              select
+              sx={{ flex: 1 }}
+            >
               {roles.map((role) => (
                 <MenuItem key={role.id} value={role.id}>
                   {role.name}
                 </MenuItem>
               ))}
             </TextField>
-            <Button variant="contained" sx={{ backgroundColor: "#FFA500", color: "white", "&:hover": { backgroundColor: "#e69500" }, height: "56px" }} onClick={handleFormSubmit}>
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "#FFA500",
+                color: "white",
+                "&:hover": { backgroundColor: "#e69500" },
+                height: "56px",
+              }}
+              onClick={handleFormSubmit}
+            >
               Add User
             </Button>
           </Box>

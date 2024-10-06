@@ -74,7 +74,7 @@ function AddMenu() {
     formDataToSend.append('name', data.name);
     formDataToSend.append('price', data.price);
     data.toppings.forEach((topping, index) => {
-      formDataToSend.append(`toppings[${index}]`, topping); // Use array indexing for toppings
+      formDataToSend.append(`toppings[${index}]`, topping); 
     });
     
     if (selectedFile) {

@@ -3,7 +3,7 @@ import React from "react";
 import { Box, Button, CardMedia, Typography } from "@mui/material";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
-import "../../app/globals.css"; // Import custom CSS
+import "../../app/globals.css";
 import { Autoplay, Pagination } from "swiper/modules";
 
 const SliderView = () => {
@@ -11,7 +11,6 @@ const SliderView = () => {
     <>
       <Box sx={{ pl: { xs: 2, md: 10 }, backgroundColor: "#FFF8F1" }}>
         {" "}
-        {/* Adjust padding for mobile */}
         <Typography
           variant="h3"
           align="left"
@@ -21,7 +20,7 @@ const SliderView = () => {
             mt: 5,
             color: "gray",
             fontSize: { xs: "1.5rem", md: "2.5rem" },
-          }} // Responsive font size
+          }}
         >
           Featured Pizza
         </Typography>
@@ -29,7 +28,7 @@ const SliderView = () => {
       <Box
         sx={{
           width: "100%",
-          maxWidth: { xs: 350, sm: 600, md: 1100 }, // Adjust width for mobile devices
+          maxWidth: { xs: 350, sm: 600, md: 1100 },
           ml: 12,
           borderRadius: 6,
           backgroundColor: "#FFF8F1",
@@ -45,11 +44,11 @@ const SliderView = () => {
             renderBullet: (index, className) =>
               `<span class="${className}" style="background-color: ${
                 className.includes("swiper-pagination-bullet-active")
-                  ? "#FFA500" // Active bullet color
-                  : "gray" // Inactive bullet color
+                  ? "#FFA500"
+                  : "gray"
               };"></span>`,
           }}
-          autoplay={{ delay: 2000 }} // Slightly longer delay for better readability
+          autoplay={{ delay: 2000 }}
         >
           <SwiperSlide>
             <Box
@@ -59,8 +58,7 @@ const SliderView = () => {
                 justifyContent: "space-between",
                 backgroundColor: "#1c465c",
                 borderRadius: 6,
-                height: { xs: 250, md: 300 }, // Adjust height for mobile
-                // padding: { xs: 2, md: 6 }, // Add padding for mobile
+                height: { xs: 250, md: 300 },
               }}
             >
               <Box
@@ -76,7 +74,7 @@ const SliderView = () => {
                   sx={{
                     fontWeight: "1.25rem",
                     color: "white",
-                    fontSize: { xs: "1.25rem", md: "1.5rem" }, // Responsive font size
+                    fontSize: { xs: "1.25rem", md: "1.5rem" },
                   }}
                 >
                   Make your first order and get
@@ -88,7 +86,7 @@ const SliderView = () => {
                 <Typography
                   sx={{
                     color: "white",
-                    fontSize: { xs: "0.75rem", md: "1rem" }, // Responsive text
+                    fontSize: { xs: "0.75rem", md: "1rem" },
                   }}
                 >
                   Lorem ipsum Lorem ipsum dolor sit amet consectetur <br />
@@ -99,9 +97,9 @@ const SliderView = () => {
                   sx={{
                     backgroundColor: "#FFA500",
                     fontWeight: "bold",
-                    fontSize: { xs: "1rem", md: "1.2rem" }, // Adjust font size
+                    fontSize: { xs: "1rem", md: "1.2rem" },
                     color: "white",
-                    width: { xs: 150, md: 200 }, // Adjust button width for mobile
+                    width: { xs: 150, md: 200 },
                     "&:hover": {
                       backgroundColor: "#FF8C00",
                     },
@@ -116,7 +114,7 @@ const SliderView = () => {
                 <CardMedia
                   component="img"
                   sx={{
-                    maxHeight: { xs: 150, md: 250 }, // Adjust image height for mobile
+                    maxHeight: { xs: 150, md: 250 },
                     maxWidth: "100%",
                     objectFit: "cover",
                     pl: 0,
@@ -135,8 +133,7 @@ const SliderView = () => {
                 justifyContent: "space-between",
                 backgroundColor: "#2d2f30",
                 borderRadius: 6,
-                height: { xs: 250, md: 300 }, // Adjust height for mobile
-                // padding: { xs: 2, md: 6 }, // Add padding for mobile
+                height: { xs: 250, md: 300 },
               }}
             >
               <Box
@@ -152,7 +149,7 @@ const SliderView = () => {
                   sx={{
                     fontWeight: "1.25rem",
                     color: "white",
-                    fontSize: { xs: "1.25rem", md: "1.5rem" }, // Responsive font size
+                    fontSize: { xs: "1.25rem", md: "1.5rem" },
                   }}
                 >
                   Make your first order and get
@@ -164,7 +161,7 @@ const SliderView = () => {
                 <Typography
                   sx={{
                     color: "white",
-                    fontSize: { xs: "0.75rem", md: "1rem" }, // Responsive text
+                    fontSize: { xs: "0.75rem", md: "1rem" },
                   }}
                 >
                   Lorem ipsum dolor sit amet consectetur Lorem ipsum
@@ -175,9 +172,9 @@ const SliderView = () => {
                   sx={{
                     backgroundColor: "#FFA500",
                     fontWeight: "bold",
-                    fontSize: { xs: "1rem", md: "1.2rem" }, // Adjust font size
+                    fontSize: { xs: "1rem", md: "1.2rem" },
                     color: "white",
-                    width: { xs: 150, md: 200 }, // Adjust button width for mobile
+                    width: { xs: 150, md: 200 },
                     "&:hover": {
                       backgroundColor: "#FF8C00",
                     },
@@ -192,7 +189,7 @@ const SliderView = () => {
                 <CardMedia
                   component="img"
                   sx={{
-                    maxHeight: { xs: 150, md: 250 }, // Adjust image height for mobile
+                    maxHeight: { xs: 150, md: 250 },
                     maxWidth: "100%",
                     objectFit: "cover",
                     pl: 0,

@@ -1,51 +1,70 @@
-'use client'
-import { Box, Button, Checkbox, FormControlLabel, Typography } from '@mui/material';
+"use client";
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Typography,
+} from "@mui/material";
 import CallMadeIcon from "@mui/icons-material/CallMade";
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 interface PizzaDisProps {
   name: string;
   topping: string;
   price: number;
-  restaurantId: number; 
+  restaurantId: number;
   onUpdate: (update: { checkedToppings: string[]; quantity: number }) => void;
-  onOrder: (orderDetails: { name: string; checkedToppings: string[]; quantity: number; price: number,restaurantId:number }) => void; 
+  onOrder: (orderDetails: {
+    name: string;
+    checkedToppings: string[];
+    quantity: number;
+    price: number;
+    restaurantId: number;
+  }) => void;
 }
 
-function Pizza_dis({ name, topping, price, restaurantId, onUpdate,onOrder }: PizzaDisProps) {
+function Pizza_dis({
+  name,
+  topping,
+  price,
+  restaurantId,
+  onUpdate,
+  onOrder,
+}: PizzaDisProps) {
   const [checkedToppings, setCheckedToppings] = useState<string[]>([]);
-  const [ quantity, setQuantity ] = useState( 1 ); 
-  
+  const [quantity, setQuantity] = useState(1);
+
   const handleCheckboxChange = (topping: string) => {
     setCheckedToppings((prev) =>
-      prev.includes(topping) ? prev.filter((t) => t !== topping) : [...prev, topping]
+      prev.includes(topping)
+        ? prev.filter((t) => t !== topping)
+        : [...prev, topping]
     );
   };
 
-  
   const handleQuantityChange = (change: number) => {
     const newQuantity = quantity + change;
     if (newQuantity > 0) {
       setQuantity(newQuantity);
-     
+
       onUpdate({ checkedToppings, quantity: newQuantity });
     }
   };
 
-  
   React.useEffect(() => {
     onUpdate({ checkedToppings, quantity });
   }, [checkedToppings, quantity, onUpdate]);
 
   function handleOrder(): void {
     onOrder({
-        name,
-        checkedToppings,
-        quantity,
-        price: price * quantity,
-        restaurantId,
-      });
-    }
+      name,
+      checkedToppings,
+      quantity,
+      price: price * quantity,
+      restaurantId,
+    });
+  }
   return (
     <Box
       sx={{
@@ -69,23 +88,31 @@ function Pizza_dis({ name, topping, price, restaurantId, onUpdate,onOrder }: Piz
             {name}
           </Typography>
         </Box>
-        <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center", overflow: 'revert' }}>
-        {Array.isArray(topping) && topping.map((t: any) => (
-            <FormControlLabel
-            key={t.toppingId}
-              control={
-                <Checkbox
-                  checked={checkedToppings.includes(t.topping.id)}
-                  onChange={() => handleCheckboxChange(t.topping.id)}
-                  sx={{
-                    "& .MuiSvgIcon-root": { color: "#FFA500" },
-                    "&.Mui-checked .MuiSvgIcon-root": { color: "#FFA500" },
-                  }}
-                />
-              }
-              label={t.topping.name}
-            />
-          ))}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            overflow: "revert",
+          }}
+        >
+          {Array.isArray(topping) &&
+            topping.map((t: any) => (
+              <FormControlLabel
+                key={t.toppingId}
+                control={
+                  <Checkbox
+                    checked={checkedToppings.includes(t.topping.id)}
+                    onChange={() => handleCheckboxChange(t.topping.id)}
+                    sx={{
+                      "& .MuiSvgIcon-root": { color: "#FFA500" },
+                      "&.Mui-checked .MuiSvgIcon-root": { color: "#FFA500" },
+                    }}
+                  />
+                }
+                label={t.topping.name}
+              />
+            ))}
         </Box>
       </Box>
       <Box sx={{ display: "flex", flexDirection: "row", gap: 6 }}>
@@ -98,7 +125,7 @@ function Pizza_dis({ name, topping, price, restaurantId, onUpdate,onOrder }: Piz
               color: "black",
             }}
             variant="outlined"
-            onClick={() => handleQuantityChange(-1)} // Decrease quantity
+            onClick={() => handleQuantityChange(-1)}
           >
             -
           </Button>
@@ -111,7 +138,7 @@ function Pizza_dis({ name, topping, price, restaurantId, onUpdate,onOrder }: Piz
               color: "black",
             }}
             variant="outlined"
-            onClick={() => handleQuantityChange(1)} // Increase quantity
+            onClick={() => handleQuantityChange(1)}
           >
             +
           </Button>
@@ -144,9 +171,7 @@ function Pizza_dis({ name, topping, price, restaurantId, onUpdate,onOrder }: Piz
         }}
         onClick={handleOrder}
         variant="contained"
-        endIcon={<CallMadeIcon
-         
-          />}
+        endIcon={<CallMadeIcon />}
       >
         Order
       </Button>

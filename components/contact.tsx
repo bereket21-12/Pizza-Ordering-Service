@@ -14,20 +14,20 @@ export default function Contact() {
         width: "100%",
         height: { xs: 150, md: 100 },
         display: "flex",
-        flexDirection: { xs: "column", md: "row" }, // Use column on mobile
+        flexDirection: { xs: "column", md: "row" },
         backgroundColor: "black",
-        justifyContent: { xs: "center", md: "space-between" }, // Center all contents horizontally
-        alignItems: "center", // Center items vertically
+        justifyContent: { xs: "center", md: "space-between" },
+        alignItems: "center",
       }}
     >
       {/* Left Side: Text */}
       <Box
         sx={{
           display: "flex",
-          flexDirection: { xs: "column", md: "row" }, // Column on mobile, row on desktop
+          flexDirection: { xs: "column", md: "row" },
           gap: 2,
           mb: { xs: 2, md: 0 },
-          textAlign: "center", // Center text on mobile
+          textAlign: "center",
         }}
       >
         <Typography sx={{ color: "white" }}>
@@ -42,7 +42,7 @@ export default function Contact() {
           display: "flex",
           flexDirection: "row",
           gap: 2,
-          justifyContent: { xs: "center", md: "flex-end" }, // Center icons on mobile, right on desktop
+          justifyContent: { xs: "center", md: "flex-end" },
         }}
       >
         <IconButton>

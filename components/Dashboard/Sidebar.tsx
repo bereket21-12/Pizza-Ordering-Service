@@ -254,7 +254,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             top: "6px",
             bottom: "6px",
             width: "5px",
-            backgroundColor: isActive(item.path) ? "#FF8100" : "transparent", // Orange color for the line
+            backgroundColor: isActive(item.path) ? "#FF8100" : "transparent", 
           },
           cursor: "pointer",
           position: "relative",

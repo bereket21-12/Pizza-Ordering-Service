@@ -11,15 +11,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
-    // <Can I="create" a="Pizza" ability={ability}>
     <main style={{ backgroundColor: "whitesmoke" }}>
-      <Sidebar>
-        {children}
-        </Sidebar>
-     
+      <Sidebar>{children}</Sidebar>
     </main>
-    // </Can>
   );
 }

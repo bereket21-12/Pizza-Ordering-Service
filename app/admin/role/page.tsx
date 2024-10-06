@@ -12,24 +12,30 @@ import {
   Switch,
   IconButton,
 } from "@mui/material";
-import { createRoleWithPermissions, getRole, UpdateRole, deleteRole, searchRole } from "@/actions/adminAction";
-import toast from "react-hot-toast"; 
+import {
+  createRoleWithPermissions,
+  getRole,
+  UpdateRole,
+  deleteRole,
+  searchRole,
+} from "@/actions/adminAction";
+import toast from "react-hot-toast";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import DeleteIcon from "@mui/icons-material/Delete"; 
-import ReusableTable from "@/components/Dashboard/Reusable"; 
+import DeleteIcon from "@mui/icons-material/Delete";
+import ReusableTable from "@/components/Dashboard/Reusable";
 
 type RoleData = {
   id: number;
   name: string;
   createdAt: string;
   permissions: { action: string; subject: string }[];
-  isActive: boolean; 
+  isActive: boolean;
 };
 
 const RolePage = () => {
   const [open, setOpen] = useState(false);
   const [roles, setRoles] = useState<RoleData[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery] = useState("");
   const [formData, setFormData] = useState<{
     name: string;
     permissions: { [key: string]: boolean };
@@ -67,7 +73,7 @@ const RolePage = () => {
 
   const handleDeleteRole = async (id: number) => {
     try {
-      await deleteRole(id); // Delete the role in the backend
+      await deleteRole(id);
       setRoles((prevRoles) => prevRoles.filter((role) => role.id !== id));
       toast.success("Role deleted successfully!");
     } catch (error) {
@@ -100,7 +106,10 @@ const RolePage = () => {
                 onChange={() =>
                   handleToggleActive(row.original.id, !row.original.isActive)
                 }
-                sx={{ color: row.original.isActive ? "green" : "red", fontSize: "0.7rem" }}
+                sx={{
+                  color: row.original.isActive ? "green" : "red",
+                  fontSize: "0.7rem",
+                }}
               />
               <IconButton
                 sx={{ color: "#FFA500" }}
@@ -122,11 +131,10 @@ const RolePage = () => {
     },
   ];
 
-  // Fetch roles when the component mounts
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const rolesData = await getRole(); // Fetch role data from the backend
+        const rolesData = await getRole();
         setRoles(
           rolesData.map((role: any) => ({
             id: role.id,
@@ -162,7 +170,6 @@ const RolePage = () => {
   };
 
   const handleAddRole = () => {
-    // Reset form data and open the modal
     setFormData({
       name: "",
       permissions: {
@@ -179,7 +186,6 @@ const RolePage = () => {
   };
 
   const handleFormSubmit = async () => {
-    // Construct permissions from the formData state
     const selectedPermissions = Object.keys(formData.permissions)
       .filter((key) => formData.permissions[key])
       .map((key) => {
@@ -219,7 +225,7 @@ const RolePage = () => {
     } else {
       const fetchRoles = async () => {
         try {
-          const rolesData = await getRole(); // Fetch role data from the backend
+          const rolesData = await getRole();
           setRoles(
             rolesData.map((role: any) => ({
               id: role.id,
@@ -244,9 +250,9 @@ const RolePage = () => {
         columns={columns}
         data={roles}
         action="Add Role"
-        onAdd={handleAddRole} 
+        onAdd={handleAddRole}
         onEdit={(role) => console.log("Edit role:", role)}
-        onDelete={handleDeleteRole} 
+        onDelete={handleDeleteRole}
       />
 
       {/* Modal for Adding/Editing Role */}
@@ -274,9 +280,7 @@ const RolePage = () => {
             label="Role Name"
             name="name"
             value={formData.name}
-            onChange={(e) =>
-              setFormData({ ...formData, name: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             fullWidth
           />
           <Typography variant="subtitle1">Permissions:</Typography>
