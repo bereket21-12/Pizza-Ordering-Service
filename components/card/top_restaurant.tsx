@@ -5,9 +5,26 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import Avatar from "@mui/material/Avatar";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/swiper-bundle.css";
 
-export default function TopRestaurant() {
+type Restaurant = {
+  id: number;
+  name: string;
+  imgUrl: string;
+  User: {
+    name: string | null;
+  }[];
+  _count: {
+    orders: number;
+  };
+};
 
+type TopRestaurantProps = {
+  restaurants: Restaurant[];
+};
+
+export default function TopRestaurant({ restaurants }: TopRestaurantProps) {
   return (
     <>
       <Box
@@ -27,65 +44,92 @@ export default function TopRestaurant() {
             color: "gray",
             fontSize: { xs: "1.5rem", md: "2.5rem" },
             backgroundColor: "#FFF8F1",
-          }} // Responsive font size
+          }}
         >
           Top Restaurants
         </Typography>
       </Box>
-      <Card
-        sx={{
-          margin: 2,
-          padding: 2,
-          display: "flex",
-          flexDirection: "row",
-          gap: 2,
-          width: 500,
-          height: 150,
-          borderRadius: 3,
+      <Swiper
+        spaceBetween={40}
+        pagination={{ clickable: true }}
+        style={{ paddingLeft: 75 }}
+        breakpoints={{
+          640: {
+            slidesPerView: 1,
+          },
+          1024: {
+            slidesPerView: 2,
+          },
         }}
       >
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <CardContent sx={{ flex: "1 0 auto" }}>
-            <Box sx={{ display: "flex", flexDirection: "row", gap: 3 }}>
-              <Avatar alt="Remy Sharp" src="/avater2.jpeg" />
-
-              <Typography sx={{ fontSize: "1 rem" }}>Asmare Pizza</Typography>
-            </Box>
-            <Typography sx={{ fontSize: "0.85rem" }}>
-              Lorem ipsum laboriosam voluptatem? Earum commodi voluptas modi.
-            </Typography>
-          </CardContent>
-        </Box>
-        <Box
-          sx={{
-            p: 5,
-            display: "flex",
-            flexDirection: "row",
-            gap: 2,
-            backgroundColor: "whitesmoke",
-          }}
-        >
-          <AssignmentIcon
-            sx={{ fontSize: "3rem", alignSelf: "center", color: "#FFA500" }}
-          />
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-            }}
-          >
-            <Typography sx={{ fontSize: "0.75rem", color: "gray" }}>
-              Number of order
-            </Typography>
-            <Typography
-              sx={{ fontWeight: "bold", fontSize: "2rem", color: "#FFA500" }}
+        {restaurants.map((restaurant) => (
+          <SwiperSlide key={restaurant.id}>
+            <Card
+              sx={{
+                margin: 1,
+                padding: 1,
+                display: "flex",
+                flexDirection: "row",
+                gap: 1,
+                width: "90%", // Reduce the width a bit
+                height: "auto", // Allow the height to adjust based on content
+                borderRadius: 2,
+              }}
             >
-              2k
-            </Typography>
-          </Box>
-        </Box>
-      </Card>
+              <Box sx={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                <CardContent sx={{ flex: "1 0 auto" }}>
+                  <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
+                    <Avatar alt={restaurant.name} src={restaurant.imgUrl} />
+                    <Typography sx={{ fontSize: "0.9rem" }}>
+                      {restaurant.name}
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: "0.75rem" }}>
+                    Managed by {restaurant.User[0]?.name}
+                  </Typography>
+                </CardContent>
+              </Box>
+              <Box
+                sx={{
+                  p: 3,
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: 1,
+                  backgroundColor: "whitesmoke",
+                }}
+              >
+                <AssignmentIcon
+                  sx={{
+                    fontSize: "2rem",
+                    alignSelf: "center",
+                    color: "#FFA500",
+                  }}
+                />
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Typography sx={{ fontSize: "0.65rem", color: "gray" }}>
+                    Number of orders
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontWeight: "bold",
+                      fontSize: "1.5rem",
+                      color: "#FFA500",
+                    }}
+                  >
+                    {restaurant._count.orders}
+                  </Typography>
+                </Box>
+              </Box>
+            </Card>
+          </SwiperSlide>
+        ))}
+      </Swiper>
     </>
   );
 }

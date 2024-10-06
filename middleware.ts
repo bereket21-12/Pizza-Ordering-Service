@@ -4,7 +4,6 @@ import { defineDynamicAbilitiesFor, transformSession } from "@/lib/ability";
 import { getToken } from "next-auth/jwt";
 import { AppAbility } from "@/types/Appability";
 
-
 const secret = process.env.NEXTAUTH_SECRET;
 
 interface Permission {
@@ -75,18 +74,17 @@ export async function middleware(request: NextRequest) {
     return redirectTo("/login", request);
   }
 
-  
   return NextResponse.next();
 }
-
 
 function redirectTo(destination: string, request: NextRequest) {
   return NextResponse.redirect(new URL(destination, request.url));
 }
 
-
 function isUnauthorizedAccess(path: string, ability: AppAbility) {
   if (path.startsWith("/admin/role") && ability.cannot("manage", "all"))
+    return true;
+  if (path.startsWith("/admin/menu") && ability.cannot("create", "pizza"))
     return true;
   if (
     path.startsWith("/customer/order_history") &&
@@ -95,7 +93,6 @@ function isUnauthorizedAccess(path: string, ability: AppAbility) {
     return true;
   return false;
 }
-
 
 export const config = {
   matcher: ["/admin/:path*", "/customer/:path*"],

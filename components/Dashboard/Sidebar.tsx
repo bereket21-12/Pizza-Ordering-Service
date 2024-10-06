@@ -98,7 +98,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
 
   const menuItems = [
       { subject:'order',action:'read', text: "Orders", path: "/admin/manage_order", icon: <InventoryOutlinedIcon /> },
-      { subject:'order',action:'create', text:"Add Menu", path: "/admin/menu", icon: <LocalPizzaOutlinedIcon /> },
+      { subject:'pizza',action:'create', text:"Add Menu", path: "/admin/menu", icon: <LocalPizzaOutlinedIcon /> },
       {subject:'role',action:'create', text: "Role", path: "/admin/role", icon: <PersonOutlineOutlinedIcon /> },
       {subject:'user',action:'create',
         text: "User",
@@ -242,7 +242,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
         {/* List with Icons */}
 <List>
   {menuItems.map((item, index) => (
-    ability.can('read', item.subject) && (
+    ability.can(item.action, item.subject) && (
       <ListItem
         key={index}
         onClick={() => router.push(item.path)}

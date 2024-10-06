@@ -31,6 +31,7 @@ export async function handleSignUp(previousState: any, formData: FormData) {
   const customerRole = await prisma.role.create({
     data: {
       name: "Customer",
+      Active: true,
       permissions: {
         create: {
           permissionId: customerPermission.id,
@@ -161,3 +162,36 @@ export async function getOrders(id: number) {
 
   return orders;
 }
+
+export const searchPizza = async (query: string) => {
+  const pizzas = await prisma.pizza.findMany({
+    where: {
+      name: {
+        contains: query,
+        mode: "insensitive",
+      },
+    },
+  });
+
+  return pizzas;
+};
+
+export const getRestaurant = async () => {
+  return prisma.restaurant.findMany({
+    select: {
+      id: true,
+      name: true,
+      imgUrl: true,
+      User: {
+        select: {
+          name: true,
+        },
+      },
+      _count: {
+        select: {
+          orders: true, // This will give you the count of orders
+        },
+      },
+    },
+  });
+};

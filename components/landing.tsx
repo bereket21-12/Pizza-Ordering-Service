@@ -10,7 +10,12 @@ import React from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import Image from "next/image";
 
-function Landing() {
+interface LandingProps {
+  searchQuery: string;
+  handleSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+function Landing({ searchQuery, handleSearchChange }: LandingProps) {
   return (
     <Box
       sx={{
@@ -19,10 +24,9 @@ function Landing() {
         gap: 1,
         paddingTop: 4,
         position: "relative",
-        overflow: "hidden", // Prevents horizontal scrolling
-        alignItems: "center", // Vertically center content
+        overflow: "hidden", 
+        alignItems: "center", 
         background: "linear-gradient(180deg, #FFFFFF 0%, #FFC993 76%, #FFF8F1 100%)",
-        
       }}
     >
       {/* Left side: Text and Search Bar */}
@@ -30,8 +34,8 @@ function Landing() {
         sx={{
           flex: 1,
           paddingLeft: { xs: 2, md: 12 },
-           width: { xs: "50%", md: "90%" },
-          zIndex: 2, // Text above image
+          width: { xs: "50%", md: "90%" },
+          zIndex: 2, 
         }}
       >
         <Box
@@ -45,8 +49,8 @@ function Landing() {
           <Typography
             sx={{
               fontWeight: "bold",
-              fontSize: { xs: "3.5rem", sm: "4.5rem", md: "6rem" }, // Adjusted font sizes
-              mb: 1, // Added bottom margin
+              fontSize: { xs: "3.5rem", sm: "4.5rem", md: "6rem" }, 
+              mb: 1, 
             }}
             variant="h3"
           >
@@ -55,8 +59,8 @@ function Landing() {
         </Box>
         <Typography
           sx={{
-            fontSize: { xs: "0.8rem", sm: "1rem", md: "1.1rem" }, // Adjusted font sizes
-            mb: 2, // Added bottom margin
+            fontSize: { xs: "0.8rem", sm: "1rem", md: "1.1rem" }, 
+            mb: 2, 
           }}
         >
           Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dolor
@@ -75,6 +79,8 @@ function Landing() {
             id="filled-adornment-search"
             type="text"
             placeholder="Search"
+            value={searchQuery}
+            onChange={handleSearchChange}
             sx={{
               borderRadius: "25px",
               paddingRight: "10px",
@@ -114,11 +120,11 @@ function Landing() {
       {/* Right side: Overlapping Images */}
       <Box
         sx={{
-          position: "relative", // Relative for responsive positioning
-          width: { xs: "50%", md: "90%" }, // Adjusted for mobile screens
-          height: "70vh", // Full height
+          position: "relative",
+          width: { xs: "50%", md: "90%" },
+          height: "70vh", 
           right: "-30%",
-          zIndex: 1, // Ensure image is behind the text
+          zIndex: 1, 
         }}
       >
         {/* Leaf Image */}
@@ -134,13 +140,13 @@ function Landing() {
         >
           <Image
             src={"/leave.png"}
-            layout="fill" // Fill the container
-            objectFit="contain" // Keep image aspect ratio
+            layout="fill"
+            objectFit="contain" 
             alt="leave"
             style={{
-              transform: "scale(1.1)", // Slightly reduce scale
-              transformOrigin: "center", // Scale from the center
-              zIndex: 1, // Ensure it's below the pizza
+              transform: "scale(1.1)", 
+              transformOrigin: "center", 
+              zIndex: 1, 
             }}
           />
         </Box>
@@ -153,17 +159,17 @@ function Landing() {
             height: "100%",
             top: 0,
             left: 0,
-            zIndex: 2, // Ensure pizza is above leaf
+            zIndex: 2, 
           }}
         >
           <Image
             src={"/Image (1).png"}
-            layout="fill" // Fill the container
-            objectFit="contain" // Keep image aspect ratio
+            layout="fill" 
+            objectFit="contain" 
             alt="pizza"
             style={{
-              transform: "scale(1.2)", // Scale up the pizza image
-              transformOrigin: "center", // Scale from the center
+              transform: "scale(1.2)", 
+              transformOrigin: "center", 
             }}
           />
         </Box>

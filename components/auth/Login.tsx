@@ -59,8 +59,8 @@ export default function Login() {
 
       console.log(session?.user.roles[0]);
 
-      if (session?.user.roles[0]?.role?.name === "Super Admin") {
-        router.push("/admin/adduser");
+      if (session?.user.roles[0]?.role?.name !== "Customer") {
+        router.push("/admin/manage_order");
       } else {
         router.push("/");
       }

@@ -600,3 +600,57 @@ export const deleteRole = async (id: number) => {
     },
   });
 };
+
+export const UpdateRole = async (id: number, Active: boolean) => {
+  return await prisma.role.update({
+    where: {
+      id: id,
+    },
+    data: {
+      Active,
+    },
+  });
+};
+
+export const searchRole = async (name: string) => {
+  return await prisma.role.findMany({
+    where: {
+      name: {
+        contains: name,
+      },
+    },
+  });
+};
+
+export const searchUser = async (name: string) => {
+  return await prisma.user.findMany({
+    where: {
+      name: {
+        contains: name,
+      },
+    },
+  });
+};
+
+export const searchOrder = async (name: string) => {
+  return await prisma.order.findMany({
+    where: {
+      OR: [
+        {
+          Pizza: {
+            name: {
+              contains: name,
+            },
+          },
+        },
+        {
+          customer: {
+            name: {
+              contains: name,
+            },
+          },
+        },
+      ],
+    },
+  });
+};

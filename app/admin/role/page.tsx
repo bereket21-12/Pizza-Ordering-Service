@@ -12,7 +12,7 @@ import {
   Switch,
   IconButton,
 } from "@mui/material";
-import { createRoleWithPermissions, getRole } from "@/actions/adminAction";
+import { createRoleWithPermissions, getRole, UpdateRole, deleteRole, searchRole } from "@/actions/adminAction";
 import toast from "react-hot-toast"; 
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete"; 
@@ -26,9 +26,10 @@ type RoleData = {
   isActive: boolean; 
 };
 
-const RoleTable = () => {
+const RolePage = () => {
   const [open, setOpen] = useState(false);
   const [roles, setRoles] = useState<RoleData[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState<{
     name: string;
     permissions: { [key: string]: boolean };
@@ -49,12 +50,30 @@ const RoleTable = () => {
     { label: "Create Role", action: "create", subject: "role" },
   ];
 
-  const handleToggleActive = (roleId: number, isActive: boolean) => {
-    setRoles((prevRoles) =>
-      prevRoles.map((role) =>
-        role.id === roleId ? { ...role, isActive } : role
-      )
-    );
+  const handleToggleActive = async (roleId: number, isActive: boolean) => {
+    try {
+      await UpdateRole(roleId, isActive);
+      setRoles((prevRoles) =>
+        prevRoles.map((role) =>
+          role.id === roleId ? { ...role, isActive } : role
+        )
+      );
+      toast.success("Role status updated successfully!");
+    } catch (error) {
+      console.error("Failed to update role status:", error);
+      toast.error("Failed to update role status.");
+    }
+  };
+
+  const handleDeleteRole = async (id: number) => {
+    try {
+      await deleteRole(id); // Delete the role in the backend
+      setRoles((prevRoles) => prevRoles.filter((role) => role.id !== id));
+      toast.success("Role deleted successfully!");
+    } catch (error) {
+      console.error("Failed to delete role:", error);
+      toast.error("Failed to delete role.");
+    }
   };
 
   const columns = [
@@ -81,21 +100,20 @@ const RoleTable = () => {
                 onChange={() =>
                   handleToggleActive(row.original.id, !row.original.isActive)
                 }
-                sx={{color: row.original.isActive ? "green" : "red", fontSize:"0.7rem"}}
-                
+                sx={{ color: row.original.isActive ? "green" : "red", fontSize: "0.7rem" }}
               />
               <IconButton
-                sx={ { color:"#FFA500"} }
+                sx={{ color: "#FFA500" }}
                 onClick={() => handleViewRole(row.original)}
               >
                 <VisibilityIcon />
               </IconButton>
               <IconButton
-                sx={ { color:"black"} }
+                sx={{ color: "black" }}
                 color="error"
                 onClick={() => handleDeleteRole(row.original.id)}
               >
-                <DeleteIcon  />
+                <DeleteIcon />
               </IconButton>
             </>
           )}
@@ -126,6 +144,23 @@ const RoleTable = () => {
     fetchRoles();
   }, []);
 
+  const handleSearch = async (query: string) => {
+    try {
+      const searchResults = await searchRole(query);
+      setRoles(
+        searchResults.map((role: any) => ({
+          id: role.id,
+          name: role.name,
+          createdAt: role.createdAt || new Date().toISOString(),
+          isActive: role.isActive,
+          permissions: role.permissions,
+        }))
+      );
+    } catch (error) {
+      console.error("Failed to search roles:", error);
+    }
+  };
+
   const handleAddRole = () => {
     // Reset form data and open the modal
     setFormData({
@@ -141,11 +176,6 @@ const RoleTable = () => {
 
   const handleViewRole = (role: RoleData) => {
     console.log("Viewing role:", role);
-  };
-
-  const handleDeleteRole = (id: number) => {
-    console.log("Deleting role with ID:", id);
-    // Implement delete logic if needed
   };
 
   const handleFormSubmit = async () => {
@@ -183,15 +213,40 @@ const RoleTable = () => {
     }
   };
 
+  useEffect(() => {
+    if (searchQuery) {
+      handleSearch(searchQuery);
+    } else {
+      const fetchRoles = async () => {
+        try {
+          const rolesData = await getRole(); // Fetch role data from the backend
+          setRoles(
+            rolesData.map((role: any) => ({
+              id: role.id,
+              name: role.name,
+              createdAt: role.createdAt || new Date().toISOString(),
+              isActive: role.isActive,
+              permissions: role.permissions,
+            }))
+          );
+        } catch (error) {
+          console.error("Failed to fetch roles:", error);
+        }
+      };
+
+      fetchRoles();
+    }
+  }, [searchQuery]);
+
   return (
     <Box sx={{ pt: 12, pr: 1 }}>
       <ReusableTable
         columns={columns}
         data={roles}
         action="Add Role"
-        onAdd={handleAddRole} // Pass the add handler
-        onEdit={(role) => console.log("Edit role:", role)} // Example edit handler
-        onDelete={handleDeleteRole} // Pass the delete handler
+        onAdd={handleAddRole} 
+        onEdit={(role) => console.log("Edit role:", role)}
+        onDelete={handleDeleteRole} 
       />
 
       {/* Modal for Adding/Editing Role */}
@@ -267,4 +322,4 @@ const RoleTable = () => {
   );
 };
 
-export default RoleTable;
+export default RolePage;

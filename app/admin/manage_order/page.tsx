@@ -1,9 +1,9 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import ReusableTable from '@/components/Dashboard/Order';
-import { Button, Modal, Box, Typography, Chip, IconButton, Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
+import ReusableTable from '@/components/Dashboard/Reusable';
+import { Button, Modal, Box, Typography, Chip, IconButton, Select, MenuItem, FormControl, InputLabel, SelectChangeEvent, TextField } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { getOrder, updateOrderStatus } from '@/actions/adminAction'; 
+import { getOrder, updateOrderStatus, searchOrder } from '@/actions/adminAction'; 
 import { useSession } from 'next-auth/react';
 import { useAbility } from '@/provider/AbilityContext';
 import { OrderStatus } from '@/types/orderStatus';
@@ -14,6 +14,7 @@ const ManageOrderPage: React.FC = () => {
   const [openToppingModal, setOpenToppingModal] = useState(false);
   const [openStatusModal, setOpenStatusModal] = useState(false);
   const [orders, setOrders] = useState<any[]>([]); 
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus>("PENDING");
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null); 
@@ -27,6 +28,28 @@ const ManageOrderPage: React.FC = () => {
     };
     fetchOrders();
   }, [session]);
+
+  useEffect(() => {
+    if (searchQuery) {
+      handleSearch(searchQuery);
+    } else {
+      const fetchOrders = async () => {
+        const id = Number(session?.user?.restaurantId);
+        const serverOrders = await getOrder(id); 
+        setOrders(serverOrders);
+      };
+      fetchOrders();
+    }
+  }, [searchQuery, session]);
+
+  const handleSearch = async (query: string) => {
+    try {
+      const searchResults = await searchOrder(query);
+      setOrders(searchResults);
+    } catch (error) {
+      console.error("Failed to search orders:", error);
+    }
+  };
 
   const columns = [
     { accessorKey: 'Pizza.name', header: 'Pizza Name' },
@@ -86,8 +109,8 @@ const ManageOrderPage: React.FC = () => {
 
   return (
     <Box sx={{ pt: 14 }}>
-      <h1>Manage Orders</h1>
-      <ReusableTable columns={columns} data={orders} />
+
+      <ReusableTable columns={ columns } data={ orders }  />
 
       {/* Modal for Topping Details */}
       <Modal open={openToppingModal} onClose={handleCloseToppingModal}>

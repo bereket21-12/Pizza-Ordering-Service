@@ -1,5 +1,6 @@
 'use client';
 import React, { useRef, useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { Box, Button, Checkbox, FormControlLabel, FormGroup, TextField, Typography } from '@mui/material';
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import styled from "@emotion/styled";
@@ -40,36 +41,35 @@ function AddMenu() {
     }
   };
 
-  // Handler to add new text field for toppings
+ 
   const handleAddTopping = () => {
-    setExtraToppings([...extraToppings, ""]); // Add an empty string for the new topping
+    setExtraToppings([...extraToppings, ""]); 
   };
 
-  // Handler to toggle checkbox selection for predefined toppings
   const handleCheckboxChange = (topping: string) => {
     setCheckedToppings((prev) =>
       prev.includes(topping) ? prev.filter((t) => t !== topping) : [...prev, topping]
     );
   };
 
-  // Form submission handler
+ 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     
-    // Constructing the toppings array
+    
     const data = {
       name: formData.get('Name') as string,
       price: formData.get('Price') as string,
       toppings: [
-        ...checkedToppings, // Include selected predefined toppings
-        ...extraToppings.filter((topping) => topping.trim() !== ""), // Include non-empty custom toppings
+        ...checkedToppings,
+        ...extraToppings.filter((topping) => topping.trim() !== ""), 
       ],
     };
     
     console.log('Form submitted:', data);
 
-    // Prepare FormData for sending
+    
     const formDataToSend = new FormData();
     formDataToSend.append('name', data.name);
     formDataToSend.append('price', data.price);
@@ -81,13 +81,17 @@ function AddMenu() {
       formDataToSend.append('image', selectedFile);
     }
 
-    executeAction(formDataToSend); // Execute the server action
+    executeAction(formDataToSend);
   };
 
   useEffect(() => {
-    if (state?.success) {
-      ref.current?.reset(); // Reset the form after submission
-      router.push("/admin/dashboard");
+    if ( state?.success ) {
+      toast.success("Menu added successfully");
+      ref.current?.reset();
+      router.push("/admin/menu");
+    }
+    else if (state?.error) {
+      toast.error("Failed to add menu");
     }
   }, [state?.success, router]);
 
@@ -186,7 +190,7 @@ function AddMenu() {
             name="image"
           />
         </Button>
-        {/* <Typography sx={{color:"red",fontWeight:"italic",fontSize:"1rem"}}>{state?.errors['image']}</Typography> */}
+
         
         <Button
           type='submit'

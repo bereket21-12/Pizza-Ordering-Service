@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Box, Button, Modal, TextField, Typography, MenuItem, IconButton, Switch } from "@mui/material";
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { getRole, createAdmin, getUserByRestaurant } from "@/actions/adminAction"; 
+import { getRole, createAdmin, getUserByRestaurant, searchUser } from "@/actions/adminAction"; 
 import ReusableTable from "@/components/Dashboard/Reusable";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
@@ -21,6 +21,7 @@ const MyTable = () => {
   const [open, setOpen] = useState(false); 
   const [users, setUsers] = useState<UserData[]>([]); 
   const [roles, setRoles] = useState<{ id: number; name: string }[]>([]); 
+  const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -35,18 +36,15 @@ const MyTable = () => {
     const id = Number(session?.user?.restaurantId); 
     const fetchRolesAndUsers = async () => {
       try {
-        
         const rolesData = await getRole();
         setRoles(rolesData);
 
         const usersData = await getUserByRestaurant(id);
         const transformedUsersData = usersData.map((user: any) => ({
           ...user,
-          role: user.roles[ 0 ]?.role.name || "", 
-          
+          role: user.roles[0]?.role.name || "", 
         }));
         setUsers(transformedUsersData);
-
       } catch (error) {
         console.error("Failed to fetch roles or users:", error);
       }
@@ -55,16 +53,50 @@ const MyTable = () => {
     fetchRolesAndUsers(); 
   }, [session]);
 
-    const handleToggleActive = (userId: number, isActive: boolean) => {
+  useEffect(() => {
+    if (searchQuery) {
+      handleSearch(searchQuery);
+    } else {
+      const id = Number(session?.user?.restaurantId); 
+      const fetchUsers = async () => {
+        try {
+          const usersData = await getUserByRestaurant(id);
+          const transformedUsersData = usersData.map((user: any) => ({
+            ...user,
+            role: user.roles[0]?.role.name || "", 
+          }));
+          setUsers(transformedUsersData);
+        } catch (error) {
+          console.error("Failed to fetch users:", error);
+        }
+      };
+
+      fetchUsers();
+    }
+  }, [searchQuery, session]);
+
+  const handleSearch = async (query: string) => {
+    try {
+      const searchResults = await searchUser(query);
+      const transformedSearchResults = searchResults.map((user: any) => ({
+        ...user,
+        role: user.roles[0]?.role.name || "", 
+      }));
+      setUsers(transformedSearchResults);
+    } catch (error) {
+      console.error("Failed to search users:", error);
+    }
+  };
+
+  const handleToggleActive = (userId: number, isActive: boolean) => {
     setUsers((prevUsers) =>
       prevUsers.map((user) =>
         user.id === userId ? { ...user, isActive } : user
       )
     );
   };
-  
 
- const columns = [
+  const columns = [
     { accessorKey: "name", header: "Name" },
     { accessorKey: "email", header: "Email" },
     { accessorKey: "phoneNumber", header: "Phone Number" },
@@ -73,26 +105,24 @@ const MyTable = () => {
       header: "Actions",
       Cell: ({ row }: any) => (
         <Box display="flex" alignItems="center">
-          <Typography  sx={{ ml: 1,fontSize:"0.8rem",color:row.original.isActive ?"green" : "red" }}>
+          <Typography sx={{ ml: 1, fontSize: "0.8rem", color: row.original.isActive ? "green" : "red" }}>
             {row.original.isActive ? "Active" : "Inactive"}
           </Typography>
           <Switch
             checked={row.original.isActive}
-                onChange={() =>
-                  handleToggleActive(row.original.id, !row.original.isActive)
-                }
+            onChange={() =>
+              handleToggleActive(row.original.id, !row.original.isActive)
+            }
             color="primary"
           />
-        <IconButton sx={{color:"#FFA500"}} >
-          <VisibilityIcon />
-        </IconButton>
+          <IconButton sx={{ color: "#FFA500" }}>
+            <VisibilityIcon />
+          </IconButton>
         </Box>
       ),
     },
   ];
 
-
-  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -101,7 +131,6 @@ const MyTable = () => {
     }));
   };
 
-  
   const handleRoleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -109,33 +138,28 @@ const MyTable = () => {
     }));
   };
 
-  
   const handleFormSubmit = async () => {
-      const id = Number(session?.user?.restaurantId); 
-      const formDataToSubmit = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        formDataToSubmit.append(key, value);
-      });
-      formDataToSubmit.append("restaurantId", id.toString()); 
-  
-      try {
-        await createAdmin(formDataToSubmit);
-        setUsers((prev) => [
-          ...prev,
-          { ...formData, id: Math.random(), role: roles.find((r) => r.id.toString() === formData.role)?.name || "" },
-        ]); 
-        setOpen(false);
-        toast.success("User added successfully!");
-      } catch (error) {
-        console.error("Error creating user:", error);
-        toast.error("Failed to create user.");
-      }
-    };
+    const id = Number(session?.user?.restaurantId); 
+    const formDataToSubmit = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      formDataToSubmit.append(key, value);
+    });
+    formDataToSubmit.append("restaurantId", id.toString()); 
 
-  
+    try {
+      await createAdmin(formDataToSubmit);
+      setUsers((prev) => [
+        ...prev,
+        { ...formData, id: Math.random(), role: roles.find((r) => r.id.toString() === formData.role)?.name || "" },
+      ]); 
+      setOpen(false);
+      toast.success("User added successfully!");
+    } catch (error) {
+      console.error("Error creating user:", error);
+      toast.error("Failed to create user.");
+    }
+  };
 
-
-  
   const handleDeleteUser = (id: number) => {
     setUsers((prev) => prev.filter((user) => user.id !== id));
     toast.success("User deleted successfully!");
@@ -143,6 +167,7 @@ const MyTable = () => {
 
   return (
     <Box sx={{ pt: 12, pr: 1 }}>
+
       <ReusableTable
         columns={columns}
         data={users}
