@@ -426,7 +426,7 @@ export const getRole = async (id: number) => {
     select: {
       name: true,
       id: true,
-
+      Active:true,
       permissions: {
         select: {
           permission: {
@@ -496,6 +496,7 @@ export const getUserByRestaurant = async (restaurantId: number) => {
     },
     select: {
       id: true,
+      Active:true,
       name: true,
       email: true,
       location: true,

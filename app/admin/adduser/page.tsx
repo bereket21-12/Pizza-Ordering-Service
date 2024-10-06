@@ -115,7 +115,7 @@ const MyTable = () => {
     { accessorKey: "email", header: "Email" },
     { accessorKey: "phoneNumber", header: "Phone Number" },
     {
-      accessorKey: "actions",
+      accessorKey: "Active",
       header: "Actions",
       Cell: ({ row }: any) => (
         <Box display="flex" alignItems="center">
@@ -123,15 +123,15 @@ const MyTable = () => {
             sx={{
               ml: 1,
               fontSize: "0.8rem",
-              color: row.original.isActive ? "green" : "red",
+              color: row.original.Active ? "green" : "red",
             }}
           >
-            {row.original.isActive ? "Active" : "Inactive"}
+            {row.original.Active ? "Active" : "Inactive"}
           </Typography>
           <Switch
-            checked={row.original.isActive}
+            checked={row.original.Active}
             onChange={() =>
-              handleToggleActive(row.original.id, !row.original.isActive)
+              handleToggleActive(row.original.id, !row.original.Active)
             }
             color="primary"
           />

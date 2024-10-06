@@ -30,7 +30,7 @@ type RoleData = {
   name: string;
   createdAt: string;
   permissions: { action: string; subject: string }[];
-  isActive: boolean;
+  Active: boolean;
 };
 
 const RolePage = () => {
@@ -87,7 +87,7 @@ const RolePage = () => {
     { accessorKey: "name", header: "Role Name" },
     { accessorKey: "createdAt", header: "Created At" },
     {
-      accessorKey: "actions",
+      accessorKey: "Active",
       header: "Actions",
       Cell: ({ row }: any) => (
         <Box display="flex" alignItems="center">
@@ -97,18 +97,18 @@ const RolePage = () => {
                 sx={{
                   ml: 1,
                   fontSize: "0.8rem",
-                  color: row.original.isActive ? "green" : "red",
+                  color: row.original.Active ? "green" : "red",
                 }}
               >
-                {row.original.isActive ? "Active" : "Inactive"}
+                {row.original.Active ? "Active" : "Inactive"}
               </Typography>
               <Switch
-                checked={row.original.isActive}
+                checked={row.original.Active}
                 onChange={() =>
-                  handleToggleActive(row.original.id, !row.original.isActive)
+                  handleToggleActive(row.original.id, !row.original.Active)
                 }
                 sx={{
-                  color: row.original.isActive ? "green" : "red",
+                  color: row.original.Active ? "green" : "red",
                   fontSize: "0.7rem",
                 }}
               />
@@ -135,20 +135,15 @@ const RolePage = () => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const restaurantId = sessoin?.user.restaurantId;
-        if (typeof restaurantId === "number") {
-          const rolesData = await getRole(restaurantId);
-        } else {
-          console.error("Invalid restaurant ID");
-          return;
-        }
+        const restaurantId = sessoin?.user.restaurantId || 0;
+
         const rolesData = await getRole(restaurantId);
         setRoles(
           rolesData.map((role: any) => ({
             id: role.id,
             name: role.name,
             createdAt: role.createdAt || new Date().toISOString(),
-            isActive: role.isActive,
+            Active: role.Active,
             permissions: role.permissions,
           }))
         );
@@ -168,7 +163,7 @@ const RolePage = () => {
           id: role.id,
           name: role.name,
           createdAt: role.createdAt || new Date().toISOString(),
-          isActive: role.isActive,
+          Active: role.Active,
           permissions: role.permissions,
         }))
       );
@@ -216,7 +211,7 @@ const RolePage = () => {
             action: perm.action,
             subject: perm.subject,
           })),
-          isActive: true,
+          Active: true,
         },
       ]);
       toast.success("Role created successfully!");
@@ -234,11 +229,6 @@ const RolePage = () => {
       const fetchRoles = async () => {
         try {
           const restaurantId = sessoin?.user.restaurantId || 0;
-          if (typeof restaurantId === "number") {
-            const rolesData = await getRole(restaurantId);
-          } else {
-            console.error("Invalid restaurant ID");
-          }
           const rolesData = await getRole(restaurantId);
 
           setRoles(
@@ -246,7 +236,7 @@ const RolePage = () => {
               id: role.id,
               name: role.name,
               createdAt: role.createdAt || new Date().toISOString(),
-              isActive: role.isActive,
+              Active: role.Active,
               permissions: role.permissions,
             }))
           );
