@@ -22,7 +22,7 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
         display: "flex",
         flexDirection: "row",
         gap: 1,
-        paddingTop: 4,
+        paddingTop: { sx: 2, md: 4 },
         position: "relative",
         overflow: "hidden",
         alignItems: "center",
@@ -49,7 +49,7 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
           <Typography
             sx={{
               fontWeight: "bold",
-              fontSize: { xs: "2.5rem", sm: "4.5rem", md: "6rem" },
+              fontSize: { xs: "1.5rem", sm: "4.5rem", md: "6rem" },
               mb: 1,
             }}
             variant="h3"
@@ -59,7 +59,7 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
         </Box>
         <Typography
           sx={{
-            fontSize: { xs: "0.8rem", sm: "1rem", md: "1.1rem" },
+            fontSize: { xs: "0.7rem", sm: "1rem", md: "1.1rem" },
             mb: 2,
           }}
         >
@@ -70,7 +70,7 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
         <FormControl
           sx={{
             m: 1,
-            width: { xs: "100%", sm: "90%", md: "45ch" },
+            width: { xs: "25ch", sm: "90%", md: "45ch" },
             color: "white",
           }}
           variant="filled"

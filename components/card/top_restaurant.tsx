@@ -52,7 +52,7 @@ export default function TopRestaurant({ restaurants }: TopRestaurantProps) {
       <Swiper
         spaceBetween={40}
         pagination={{ clickable: true }}
-        style={{ paddingLeft: 75 }}
+        style={{ paddingLeft: 50 }}
         breakpoints={{
           640: {
             slidesPerView: 1,

@@ -9,7 +9,7 @@ import { Autoplay, Pagination } from "swiper/modules";
 const SliderView = () => {
   return (
     <>
-      <Box sx={{ pl: { xs: 2, md: 10 }, backgroundColor: "#FFF8F1" }}>
+      <Box sx={{ pl: { xs: 6, md: 10 }, backgroundColor: "#FFF8F1" }}>
         {" "}
         <Typography
           variant="h3"
