@@ -16,10 +16,9 @@ const SliderView = () => {
           align="left"
           sx={{
             mb: 3,
-            ml: 2,
             mt: 5,
             color: "gray",
-            fontSize: { xs: "1.5rem", md: "2.5rem" },
+            fontSize: { xs: "1rem", md: "2.5rem" },
           }}
         >
           Featured Pizza
@@ -59,7 +58,7 @@ const SliderView = () => {
                 justifyContent: "space-between",
                 backgroundColor: "#1c465c",
                 borderRadius: 6,
-                height: { xs: 250, md: 300 },
+                height: { xs: 200, md: 300 },
               }}
             >
               <Box

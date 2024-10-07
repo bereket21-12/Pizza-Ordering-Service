@@ -42,7 +42,7 @@ export default function TopRestaurant({ restaurants }: TopRestaurantProps) {
             ml: 2,
             mt: 5,
             color: "gray",
-            fontSize: { xs: "1.5rem", md: "2.5rem" },
+            fontSize: { xs: "1rem", md: "2.5rem" },
             backgroundColor: "#FFF8F1",
           }}
         >
