@@ -49,7 +49,7 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
           <Typography
             sx={{
               fontWeight: "bold",
-              fontSize: { xs: "3.5rem", sm: "4.5rem", md: "6rem" },
+              fontSize: { xs: "2.5rem", sm: "4.5rem", md: "6rem" },
               mb: 1,
             }}
             variant="h3"
@@ -70,7 +70,7 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
         <FormControl
           sx={{
             m: 1,
-            width: { xs: "100%", sm: "80%", md: "45ch" },
+            width: { xs: "100%", sm: "90%", md: "45ch" },
             color: "white",
           }}
           variant="filled"
@@ -129,7 +129,7 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
         <Box
           sx={{
             position: "absolute",
-            width: { xs: "50%", md: "90%" },
+            width: { xs: "70%", md: "90%" },
             height: "100%",
             top: 0,
             left: 0,

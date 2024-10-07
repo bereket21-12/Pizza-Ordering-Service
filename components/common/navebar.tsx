@@ -105,7 +105,6 @@ const Navbar = () => {
         background: "transparent",
       }}
     >
-
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <IconButton size="large" edge="start" aria-label="menu" sx={{ mr: 2 }}>
           <Image
@@ -116,12 +115,15 @@ const Navbar = () => {
           />
         </IconButton>
         <Typography
-          sx={{ fontWeight: "bold", fontSize: "1.5rem", color: "#AF5901" }}
+          sx={{
+            fontWeight: "bold",
+            fontSize: { sx: "1rem", md: "1.5rem" },
+            color: "#AF5901",
+          }}
         >
           Pizza
         </Typography>
       </Box>
-
 
       <Box
         sx={{
@@ -134,8 +136,7 @@ const Navbar = () => {
           <Button
             sx={{
               color: "black",
-              fontSize: "1.2rem",
-              fontWeight: "bold",
+              fontSize: { xs: "0.9rem", md: "1.2rem" },
               textDecoration: "none",
               "&:hover": {
                 color: "#FFA500",
@@ -149,8 +150,7 @@ const Navbar = () => {
           <Button
             sx={{
               color: "black",
-              fontSize: { xs: "1rem", md: "1.2rem" },
-              fontWeight: "bold",
+              fontSize: { xs: "0.9rem", md: "1.2rem" },
               textDecoration: "none",
               "&:hover": {
                 color: "#FFA500",
@@ -164,8 +164,7 @@ const Navbar = () => {
           <Button
             sx={{
               color: "black",
-              fontSize: { xs: "1rem", md: "1.2rem" },
-              fontWeight: "bold",
+              fontSize: { xs: "0.9rem", md: "1.2rem" },
               textDecoration: "none",
               "&:hover": {
                 color: "#FFA500",
@@ -186,8 +185,7 @@ const Navbar = () => {
                 <Button
                   sx={{
                     color: "black",
-                    fontSize: "1.2rem",
-                    fontWeight: "bold",
+                    fontSize: { xs: "0.9rem", md: "1.2rem" },
                     textDecoration: "none",
                     "&:hover": {
                       color: "#FFA500",
@@ -201,8 +199,7 @@ const Navbar = () => {
                 <Button
                   sx={{
                     color: "black",
-                    fontSize: { xs: "1rem", md: "1.2rem" },
-                    fontWeight: "bold",
+                    fontSize: { xs: "0.9rem", md: "1.2rem" },
                     textDecoration: "none",
                     "&:hover": {
                       color: "#FFA500",
@@ -264,8 +261,7 @@ const Navbar = () => {
                 <Button
                   sx={{
                     color: "black",
-                    fontSize: "1.2rem",
-                    fontWeight: "bold",
+                    fontSize: { xs: "0.9rem", md: "1.2rem" },
                     textDecoration: "none",
                     "&:hover": {
                       color: "#FFA500",
@@ -279,8 +275,7 @@ const Navbar = () => {
                 <Button
                   sx={{
                     color: "black",
-                    fontSize: { xs: "1rem", md: "1.2rem" },
-                    fontWeight: "bold",
+                    fontSize: { xs: "0.9rem", md: "1.2rem" },
                     textDecoration: "none",
                     "&:hover": {
                       color: "#FFA500",
