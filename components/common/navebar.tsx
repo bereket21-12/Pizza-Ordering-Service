@@ -99,7 +99,7 @@ const Navbar = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "0 20px",
+        padding: { sx: "0 10px", md: "0 20px" },
         width: "100%",
         zIndex: 1,
         background: "transparent",
