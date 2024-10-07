@@ -28,7 +28,7 @@ const SliderView = () => {
       <Box
         sx={{
           width: "100%",
-          maxWidth: { xs: 450, sm: 800, md: 1100 },
+          maxWidth: { xs: 450, sm: 750, md: 1100 },
           // ml: { xs: 4, sm: 6, md: 12 },
           mx: "auto",
           borderRadius: 6,

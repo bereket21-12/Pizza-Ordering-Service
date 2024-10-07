@@ -22,7 +22,7 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
         display: "flex",
         flexDirection: "row",
         gap: 1,
-        // paddingTop: { sx: 2, md: 4 },
+        height: { xs: "300px", md: "100vh" }, // Corrected breakpoint for small devices
         position: "relative",
         overflow: "hidden",
         alignItems: "center",
