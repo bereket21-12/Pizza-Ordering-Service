@@ -27,7 +27,7 @@ const SliderView = () => {
       <Box
         sx={{
           width: "100%",
-          maxWidth: { xs: 450, sm: 750, md: 1100 },
+          maxWidth: { xs: 400, sm: 700, md: 1100 },
           // ml: { xs: 4, sm: 6, md: 12 },
           mx: "auto",
           borderRadius: 6,
@@ -133,7 +133,7 @@ const SliderView = () => {
                 justifyContent: "space-between",
                 backgroundColor: "#2d2f30",
                 borderRadius: 6,
-                height: { xs: 250, md: 300 },
+                height: { xs: 200, md: 300 },
               }}
             >
               <Box
