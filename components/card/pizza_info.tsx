@@ -11,7 +11,7 @@ import React, { useState } from "react";
 
 interface PizzaDisProps {
   name: string;
-  topping: string;
+  topping: string[];
   price: number;
   restaurantId: number;
   onUpdate: (update: { checkedToppings: string[]; quantity: number }) => void;
@@ -47,7 +47,6 @@ function Pizza_dis({
     const newQuantity = quantity + change;
     if (newQuantity > 0) {
       setQuantity(newQuantity);
-
       onUpdate({ checkedToppings, quantity: newQuantity });
     }
   };
@@ -65,15 +64,16 @@ function Pizza_dis({
       restaurantId,
     });
   }
+
   return (
     <Box
       sx={{
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
-        width: "50%",
-        gap: 4,
-        p: 0,
+        width: { xs: "100%", md: "50%" },
+        gap: 2,
+        p: 2,
       }}
     >
       <Box
@@ -81,19 +81,27 @@ function Pizza_dis({
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
+          alignItems: "center",
         }}
       >
-        <Box>
-          <Typography variant="h3" sx={{ fontWeight: "bold" }}>
-            {name}
-          </Typography>
-        </Box>
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: "bold",
+            fontSize: { xs: "2rem", md: "3rem" },
+            textAlign: "center",
+          }}
+        >
+          {name}
+        </Typography>
         <Box
           sx={{
             display: "flex",
             flexDirection: "row",
             justifyContent: "center",
-            overflow: "revert",
+            flexWrap: "wrap",
+            gap: 1,
+            mt: 2,
           }}
         >
           {Array.isArray(topping) &&
@@ -115,59 +123,68 @@ function Pizza_dis({
             ))}
         </Box>
       </Box>
-      <Box sx={{ display: "flex", flexDirection: "row", gap: 6 }}>
-        <Box sx={{ display: "flex", flexDirection: "row", gap: 6 }}>
-          <Button
-            sx={{
-              fontSize: "2rem",
-              fontWeight: "bold",
-              borderColor: "#FFA500",
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 2,
+          mt: 2,
+        }}
+      >
+        <Button
+          sx={{
+            fontSize: { xs: "1.5rem", md: "2rem" },
+            fontWeight: "bold",
+            borderColor: "#FFA500",
+            color: "black",
+          }}
+          variant="outlined"
+          onClick={() => handleQuantityChange(-1)}
+        >
+          -
+        </Button>
+        <Typography sx={{ fontSize: { xs: "1.5rem", md: "2rem" } }}>
+          {quantity}
+        </Typography>
+        <Button
+          sx={{
+            fontSize: { xs: "1.5rem", md: "2rem" },
+            fontWeight: "bold",
+            borderColor: "#FFA500",
+            color: "black",
+          }}
+          variant="outlined"
+          onClick={() => handleQuantityChange(1)}
+        >
+          +
+        </Button>
+        <Typography
+          sx={{
+            color: "#059605",
+            fontWeight: "bold",
+            fontSize: { xs: "1rem", md: "2rem" },
+          }}
+        >
+          {price * quantity}
+          <sup
+            style={{
+              fontWeight: "lighter",
+              fontSize: "0.35em",
               color: "black",
             }}
-            variant="outlined"
-            onClick={() => handleQuantityChange(-1)}
           >
-            -
-          </Button>
-          <Typography sx={{ fontSize: "2rem" }}>{quantity}</Typography>
-          <Button
-            sx={{
-              fontSize: "2rem",
-              fontWeight: "bold",
-              borderColor: "#FFA500",
-              color: "black",
-            }}
-            variant="outlined"
-            onClick={() => handleQuantityChange(1)}
-          >
-            +
-          </Button>
-          <Typography
-            variant="h6"
-            sx={{
-              color: "#059605",
-              fontWeight: "bold",
-              fontSize: { xs: "1.5rem", md: "2rem" },
-            }}
-          >
-            {price}
-            <sup
-              style={{
-                fontWeight: "lighter",
-                fontSize: "0.35em",
-                color: "black",
-              }}
-            >
-              Birr
-            </sup>
-          </Typography>
-        </Box>
+            Birr
+          </sup>
+        </Typography>
       </Box>
       <Button
         sx={{
           backgroundColor: "#FFA500",
           color: "white",
-          fontSize: "1.2rem",
+          fontSize: { xs: "1rem", md: "1.2rem" },
+          mt: 2,
         }}
         onClick={handleOrder}
         variant="contained"
