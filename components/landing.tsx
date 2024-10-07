@@ -22,7 +22,7 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
         display: "flex",
         flexDirection: "row",
         gap: 1,
-        paddingTop: { sx: 2, md: 4 },
+        // paddingTop: { sx: 2, md: 4 },
         position: "relative",
         overflow: "hidden",
         alignItems: "center",
