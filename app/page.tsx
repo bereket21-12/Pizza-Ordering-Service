@@ -133,8 +133,8 @@ export default function Home() {
           handleSearchChange={handleSearchChange}
         />
 
-        <TopRestaurant restaurants={restaurants} />
         <SliderView />
+        <TopRestaurant restaurants={restaurants} />
         <Heading heading={"Popular Pizzas"} />
         <Box
           sx={{
