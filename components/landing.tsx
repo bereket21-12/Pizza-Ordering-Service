@@ -120,7 +120,7 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
       <Box
         sx={{
           position: "relative",
-          width: { xs: "50%", md: "90%" },
+          width: { xs: "70%", md: "90%" },
           height: "70vh",
           right: "-30%",
           zIndex: 1,
@@ -129,7 +129,7 @@ function Landing({ searchQuery, handleSearchChange }: LandingProps) {
         <Box
           sx={{
             position: "absolute",
-            width: { xs: "70%", md: "90%" },
+            width: { xs: "90%", md: "90%" },
             height: "100%",
             top: 0,
             left: 0,

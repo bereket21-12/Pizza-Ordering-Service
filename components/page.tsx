@@ -318,7 +318,7 @@ function Page() {
         >
           <Box
             sx={{
-              width: "600px",
+              width: { sx: "450px", md: "600px" },
               height: "400px",
               backgroundColor: "white",
               borderRadius: "20px",
