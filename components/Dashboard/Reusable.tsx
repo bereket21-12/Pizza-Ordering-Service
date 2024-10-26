@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { MaterialReactTable } from "material-react-table";
 import { Button, Box } from "@mui/material";
 
@@ -10,6 +10,7 @@ type ReusableTableProps<DataType> = {
   onEdit?: (row: DataType) => void;
   onDelete?: (id: number) => void;
   action?: string;
+  onFilterChange?: (query: string) => void; // Add this prop for server-side filtering
 };
 
 const ReusableTable = <DataType,>({
@@ -17,24 +18,22 @@ const ReusableTable = <DataType,>({
   data,
   onAdd,
   action,
+  onFilterChange, // Destructure the new prop
 }: ReusableTableProps<DataType>) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const filteredData = data.filter((row: any) =>
-    Object.values(row).some((value) =>
-      String(value).toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
-
   return (
     <div>
       <MaterialReactTable
         columns={columns}
-        data={filteredData}
+        data={data}
         manualFiltering
         state={{
-          globalFilter: searchQuery,
+          globalFilter: "",
         }}
-        onGlobalFilterChange={(value: string) => setSearchQuery(value)}
+        onGlobalFilterChange={(value: string) => {
+          if (onFilterChange) {
+            onFilterChange(value); // Call the parent component's filter change handler
+          }
+        }}
         renderTopToolbarCustomActions={() => (
           <Box display="flex" justifyContent="space-between" gap={2}>
             {/* Add Role Button */}

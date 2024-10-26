@@ -8,6 +8,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { useRouter } from 'next/navigation';
 import { useActionStateCompat } from "@strozw/use-action-state-compat";
 import { handleCreateMenu } from '@/actions/adminAction';
+import { useSession } from "next-auth/react";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -33,7 +34,7 @@ function AddMenu() {
     "Olives"
   ]);
   const [state, executeAction] = useActionStateCompat(handleCreateMenu, null);
-
+const {data:session} = useSession();
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
@@ -73,6 +74,7 @@ function AddMenu() {
     const formDataToSend = new FormData();
     formDataToSend.append('name', data.name);
     formDataToSend.append('price', data.price);
+    formDataToSend.append('id', String(session?.user?.restaurantId))
     data.toppings.forEach((topping, index) => {
       formDataToSend.append(`toppings[${index}]`, topping); 
     });

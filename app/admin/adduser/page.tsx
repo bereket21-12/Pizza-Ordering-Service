@@ -16,6 +16,7 @@ import {
   createAdmin,
   getUserByRestaurant,
   searchUser,
+  updateUser,
 } from "@/actions/adminAction";
 import ReusableTable from "@/components/Dashboard/Reusable";
 import toast from "react-hot-toast";
@@ -28,6 +29,7 @@ type UserData = {
   location: string | null;
   phoneNumber: string;
   role: string;
+  Active: boolean; 
 };
 
 const MyTable = () => {
@@ -57,6 +59,7 @@ const MyTable = () => {
         const transformedUsersData = usersData.map((user: any) => ({
           ...user,
           role: user.roles[0]?.role.name || "",
+          Active: user.Active || false, 
         }));
         setUsers(transformedUsersData);
       } catch (error) {
@@ -78,6 +81,7 @@ const MyTable = () => {
           const transformedUsersData = usersData.map((user: any) => ({
             ...user,
             role: user.roles[0]?.role.name || "",
+            Active: user.Active || false, // Initialize Active property
           }));
           setUsers(transformedUsersData);
         } catch (error) {
@@ -91,10 +95,13 @@ const MyTable = () => {
 
   const handleSearch = async (query: string) => {
     try {
-      const searchResults = await searchUser(query);
+      const id = Number(session?.user?.restaurantId);
+
+      const searchResults = await searchUser(query,id);
       const transformedSearchResults = searchResults.map((user: any) => ({
         ...user,
         role: user.roles[0]?.role.name || "",
+        Active: user.Active || false, 
       }));
       setUsers(transformedSearchResults);
     } catch (error) {
@@ -105,9 +112,17 @@ const MyTable = () => {
   const handleToggleActive = (userId: number, isActive: boolean) => {
     setUsers((prevUsers) =>
       prevUsers.map((user) =>
-        user.id === userId ? { ...user, isActive } : user
+        user.id === userId ? { ...user, Active: isActive } : user
       )
     );
+    try {
+      updateUser(userId, isActive);
+      toast.success("User status updated successfully!");
+    } catch (error) {
+      console.error("Failed to update user status:", error);
+      toast.error("Failed to update user status.");
+    }
+  
   };
 
   const columns = [
@@ -175,6 +190,7 @@ const MyTable = () => {
           id: Math.random(),
           role:
             roles.find((r) => r.id.toString() === formData.role)?.name || "",
+          Active: true, // Set Active to true for new users
         },
       ]);
       setOpen(false);
@@ -195,6 +211,7 @@ const MyTable = () => {
       <ReusableTable
         columns={columns}
         data={users}
+        onFilterChange={handleSearch}
         action="Add User"
         onAdd={() => setOpen(true)}
         onEdit={(user) => console.log("Edit user:", user)}

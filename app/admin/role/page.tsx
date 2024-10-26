@@ -36,7 +36,7 @@ type RoleData = {
 const RolePage = () => {
   const [open, setOpen] = useState(false);
   const [roles, setRoles] = useState<RoleData[]>([]);
-  const [searchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState<{
     name: string;
     permissions: { [key: string]: boolean };
@@ -48,7 +48,7 @@ const RolePage = () => {
       addRole: false,
     },
   });
-  const { data: sessoin } = useSession();
+  const { data: session } = useSession();
   const permissionsList = [
     { label: "Update Order Status", action: "Update", subject: "Order" },
     { label: "See Order", action: "read", subject: "Order" },
@@ -57,14 +57,29 @@ const RolePage = () => {
     { label: "Create Role", action: "create", subject: "role" },
   ];
 
+  const fetchRoles = async () => {
+    try {
+      if (!session) return; // Ensure session is available
+      const restaurantId = session.user.restaurantId || 0;
+      const rolesData = await getRole(restaurantId);
+      setRoles(
+        rolesData.map((role: any) => ({
+          id: role.id,
+          name: role.name,
+          createdAt: new Date(role.createdAt).toLocaleString(), // Format the date
+          Active: role.Active,
+          permissions: role.permissions,
+        }))
+      );
+    } catch (error) {
+      console.error("Failed to fetch roles:", error);
+    }
+  };
+
   const handleToggleActive = async (roleId: number, isActive: boolean) => {
     try {
       await UpdateRole(roleId, isActive);
-      setRoles((prevRoles) =>
-        prevRoles.map((role) =>
-          role.id === roleId ? { ...role, isActive } : role
-        )
-      );
+      await fetchRoles();
       toast.success("Role status updated successfully!");
     } catch (error) {
       console.error("Failed to update role status:", error);
@@ -75,11 +90,79 @@ const RolePage = () => {
   const handleDeleteRole = async (id: number) => {
     try {
       await deleteRole(id);
-      setRoles((prevRoles) => prevRoles.filter((role) => role.id !== id));
+      await fetchRoles();
       toast.success("Role deleted successfully!");
     } catch (error) {
       console.error("Failed to delete role:", error);
       toast.error("Failed to delete role.");
+    }
+  };
+
+  const handleSearch = async (query: string) => {
+    try {
+      const restaurantId = session?.user?.restaurantId ?? 0; // Default to 0 if undefined
+      const searchResults = await searchRole(query, restaurantId);
+      setRoles(
+        searchResults.map((role: any) => ({
+          id: role.id,
+          name: role.name,
+          createdAt: new Date(role.createdAt).toLocaleString(), // Format the date
+          Active: role.Active,
+          permissions: role.permissions,
+        }))
+      );
+    } catch (error) {
+      console.error("Failed to search roles:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoles();
+  }, [session]);
+
+  useEffect(() => {
+    if (searchQuery) {
+      handleSearch(searchQuery);
+    } else {
+      fetchRoles();
+    }
+  }, [searchQuery]);
+
+  const handleAddRole = () => {
+    setFormData({
+      name: "",
+      permissions: {
+        addUser: false,
+        seeCustomer: false,
+        addRole: false,
+      },
+    });
+    setOpen(true);
+  };
+
+  const handleViewRole = (role: RoleData) => {
+    console.log("Viewing role:", role);
+  };
+
+  const handleFormSubmit = async () => {
+    const selectedPermissions = Object.keys(formData.permissions)
+      .filter((key) => formData.permissions[key])
+      .map((key) => {
+        const [action, subject] = key.split(/(?=[A-Z])/);
+        return { action, subject: subject.toLowerCase() };
+      });
+
+    try {
+      await createRoleWithPermissions(
+        formData.name,
+        selectedPermissions
+      );
+      await fetchRoles();
+      toast.success("Role created successfully!");
+      setOpen(false);
+    } catch (error) {
+      console.error("Error creating role:", error);
+      toast.error("Failed to create role.");
     }
   };
 
@@ -132,123 +215,6 @@ const RolePage = () => {
     },
   ];
 
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const restaurantId = sessoin?.user.restaurantId || 0;
-
-        const rolesData = await getRole(restaurantId);
-        setRoles(
-          rolesData.map((role: any) => ({
-            id: role.id,
-            name: role.name,
-            createdAt: role.createdAt || new Date().toISOString(),
-            Active: role.Active,
-            permissions: role.permissions,
-          }))
-        );
-      } catch (error) {
-        console.error("Failed to fetch roles:", error);
-      }
-    };
-
-    fetchRoles();
-  }, []);
-
-  const handleSearch = async (query: string) => {
-    try {
-      const searchResults = await searchRole(query);
-      setRoles(
-        searchResults.map((role: any) => ({
-          id: role.id,
-          name: role.name,
-          createdAt: role.createdAt || new Date().toISOString(),
-          Active: role.Active,
-          permissions: role.permissions,
-        }))
-      );
-    } catch (error) {
-      console.error("Failed to search roles:", error);
-    }
-  };
-
-  const handleAddRole = () => {
-    setFormData({
-      name: "",
-      permissions: {
-        addUser: false,
-        seeCustomer: false,
-        addRole: false,
-      },
-    });
-    setOpen(true);
-  };
-
-  const handleViewRole = (role: RoleData) => {
-    console.log("Viewing role:", role);
-  };
-
-  const handleFormSubmit = async () => {
-    const selectedPermissions = Object.keys(formData.permissions)
-      .filter((key) => formData.permissions[key])
-      .map((key) => {
-        const [action, subject] = key.split(/(?=[A-Z])/);
-        return { action, subject: subject.toLowerCase() };
-      });
-
-    try {
-      const newRole = await createRoleWithPermissions(
-        formData.name,
-        selectedPermissions
-      );
-      setRoles((prevRoles) => [
-        ...prevRoles,
-        {
-          id: newRole.id,
-          name: newRole.name,
-          createdAt: new Date().toISOString(),
-          permissions: newRole.permissions.map((perm: any) => ({
-            action: perm.action,
-            subject: perm.subject,
-          })),
-          Active: true,
-        },
-      ]);
-      toast.success("Role created successfully!");
-      setOpen(false);
-    } catch (error) {
-      console.error("Error creating role:", error);
-      toast.error("Failed to create role.");
-    }
-  };
-
-  useEffect(() => {
-    if (searchQuery) {
-      handleSearch(searchQuery);
-    } else {
-      const fetchRoles = async () => {
-        try {
-          const restaurantId = sessoin?.user.restaurantId || 0;
-          const rolesData = await getRole(restaurantId);
-
-          setRoles(
-            rolesData.map((role: any) => ({
-              id: role.id,
-              name: role.name,
-              createdAt: role.createdAt || new Date().toISOString(),
-              Active: role.Active,
-              permissions: role.permissions,
-            }))
-          );
-        } catch (error) {
-          console.error("Failed to fetch roles:", error);
-        }
-      };
-
-      fetchRoles();
-    }
-  }, [searchQuery]);
-
   return (
     <Box sx={{ pt: 12, pr: 1 }}>
       <ReusableTable
@@ -258,6 +224,7 @@ const RolePage = () => {
         onAdd={handleAddRole}
         onEdit={(role) => console.log("Edit role:", role)}
         onDelete={handleDeleteRole}
+        onFilterChange={setSearchQuery} // Pass the search query handler
       />
 
       {/* Modal for Adding/Editing Role */}

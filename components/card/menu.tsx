@@ -33,11 +33,12 @@ const PizzaMenu: React.FC<PizzaMenuProps> = ({
   return (
     <Card
       sx={{
-        maxWidth: 350,
-        width: "100%",
+        
+        width: 350,
         mx: "auto",
         mt: 1,
         borderRadius: 5,
+        height:550
       }}
     >
       {/* Ellipse-shaped background with image on top */}

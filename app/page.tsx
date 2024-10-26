@@ -141,22 +141,22 @@ export default function Home() {
             display: "flex",
             flexDirection: "row",
             flexWrap: "wrap",
-            justifyContent: "flex-start",
+            justifyContent: "center",
             gap: "2px",
             p: 5,
           }}
         >
           {loading ? (
             <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignSelf: "center",
-                height: "50vh",
-              }}
-            >
-              <CircularProgress />
-            </Box>
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignSelf: "center",
+              height: "50vh",
+            }}
+          >
+            <CircularProgress />
+          </Box>
           ) : (
             pizzas &&
             pizzas.length > 0 &&
@@ -202,6 +202,7 @@ export default function Home() {
                 justifyContent: "center",
                 alignSelf: "center",
                 height: "50vh",
+                mb:2
               }}
             >
               <CircularProgress />

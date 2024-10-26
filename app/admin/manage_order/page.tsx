@@ -35,13 +35,14 @@ const ManageOrderPage: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus>("PENDING");
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
 
+  const fetchOrders = async () => {
+    const id = Number(session?.user?.restaurantId);
+    const serverOrders = await getOrder(id);
+    console.log("orders :", serverOrders);
+    setOrders(serverOrders);
+  };
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      const id = Number(session?.user?.restaurantId);
-      const serverOrders = await getOrder(id);
-      console.log("orders :", serverOrders);
-      setOrders(serverOrders);
-    };
     fetchOrders();
   }, [session]);
 
@@ -49,19 +50,22 @@ const ManageOrderPage: React.FC = () => {
     if (searchQuery) {
       handleSearch(searchQuery);
     } else {
-      const fetchOrders = async () => {
-        const id = Number(session?.user?.restaurantId);
-        const serverOrders = await getOrder(id);
-        setOrders(serverOrders);
-      };
       fetchOrders();
     }
-  }, [searchQuery, session]);
+  }, [searchQuery]);
 
   const handleSearch = async (query: string) => {
+    console.log("Searching for:", query); // Log the search query
     try {
-      const searchResults = await searchOrder(query);
-      setOrders(searchResults);
+      const restaurantId = session?.user?.restaurantId;
+      if (typeof restaurantId === "number") {
+        const searchResults = await searchOrder(query, restaurantId);
+        console.log("Search results:", searchResults); // Log the search results
+        setOrders(searchResults);
+      } else {
+        console.error("Invalid restaurant ID:", restaurantId);
+      }
+
     } catch (error) {
       console.error("Failed to search orders:", error);
     }
@@ -142,7 +146,7 @@ const ManageOrderPage: React.FC = () => {
 
   return (
     <Box sx={{ pt: 14 }}>
-      <ReusableTable columns={columns} data={orders} />
+      <ReusableTable columns={columns} data={orders} onFilterChange={handleSearch} />
 
       {/* Modal for Topping Details */}
       <Modal open={openToppingModal} onClose={handleCloseToppingModal}>

@@ -11,6 +11,7 @@ import { MenuSchema, restaurantSchema, signUpSchema } from "../utils/schema";
 import { uploadImage } from "./uploadImage";
 import prisma from "@/lib/prisma";
 import { OrderStatus, User } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 
 export async function handleCreateRestaurant(
   previousState: any,
@@ -85,6 +86,7 @@ export async function handleCreateMenu(previousState: any, formData: FormData) {
     name: formData.get("name") as string,
     price: formData.get("price") as string,
     imgUrl: formData.get("image") as File,
+    restaurantId:formData.get("id") 
   };
 
   const results = MenuSchema.safeParse(formValues);
@@ -131,7 +133,7 @@ export async function handleCreateMenu(previousState: any, formData: FormData) {
       imgurl: uploadedImageUrl,
       restaurant: {
         connect: {
-          id: 1,
+          id: Number(formValues.restaurantId),
         },
       },
       toppings: {
@@ -427,6 +429,7 @@ export const getRole = async (id: number) => {
       name: true,
       id: true,
       Active:true,
+      createdAt: true,
       permissions: {
         select: {
           permission: {
@@ -614,47 +617,85 @@ export const UpdateRole = async (id: number, Active: boolean) => {
       Active,
     },
   });
+  
 };
 
-export const searchRole = async (name: string) => {
+
+
+export const searchRole = async (name: string,id:number) => {
   return await prisma.role.findMany({
     where: {
+      restaurantId: id,
       name: {
         contains: name,
+        mode: "insensitive",
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      createdAt: true,
+      Active: true,
+      permissions: {
+        select: {
+          permission: {
+            select: {
+              action: true,
+              subject: true,
+            },
+          },
+        },
       },
     },
   });
 };
 
-export const searchUser = async (name: string) => {
+export const searchUser = async (name: string,id:number) => {
   return await prisma.user.findMany({
     where: {
+      restaurantId: id,
       name: {
         contains: name,
+        mode: "insensitive",
+      },
+    },
+    select: {
+      email: true,
+      name: true,
+      phoneNumber: true,
+      Active:true,
+      roles: {
+        select: {
+          role: {
+            select: {
+              name: true,
+            },
+          },
+        },
       },
     },
   });
 };
 
-export const searchOrder = async (name: string) => {
+
+export const searchOrder = async (name: string,id:number) => {
   return await prisma.order.findMany({
     where: {
-      OR: [
-        {
-          Pizza: {
-            name: {
-              contains: name,
-            },
-          },
+      restaurantId: id,
+      Pizza: {
+        name: {
+          contains: name,
+          mode: "insensitive",
         },
-        {
-          customer: {
-            name: {
-              contains: name,
-            },
-          },
+      },
+    },
+    include: {
+      customer: {
+        select: {
+          phoneNumber: true,
         },
-      ],
+      },
+      Pizza: true, 
     },
   });
 };
