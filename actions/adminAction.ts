@@ -338,6 +338,7 @@ export async function handleOrderForm(previousState: any, formData: FormData) {
 
 export const createRoleWithPermissions = async (
   roleName: string,
+  id:number,
   permissions: { action: string; subject: string }[]
 ) => {
   // Step 1: Ensure all permissions exist before creating the role
@@ -362,7 +363,7 @@ export const createRoleWithPermissions = async (
     data: {
       name: roleName,
       restaurant: {
-        connect: { id: 1 }, // Assuming you have a restaurant ID to connect
+        connect: { id: id }, // Assuming you have a restaurant ID to connect
       },
       permissions: {
         create: permissionIds.map((permissionId) => ({

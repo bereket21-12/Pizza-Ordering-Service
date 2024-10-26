@@ -171,6 +171,7 @@ export const searchPizza = async (query: string) => {
         mode: "insensitive",
       },
     },
+ 
   });
 
   return pizzas;

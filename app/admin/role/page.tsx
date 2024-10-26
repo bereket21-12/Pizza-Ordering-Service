@@ -60,7 +60,7 @@ const RolePage = () => {
   const fetchRoles = async () => {
     try {
       if (!session) return; // Ensure session is available
-      const restaurantId = session.user.restaurantId || 0;
+      const restaurantId = session?.user?.restaurantId || 0;
       const rolesData = await getRole(restaurantId);
       setRoles(
         rolesData.map((role: any) => ({
@@ -145,6 +145,8 @@ const RolePage = () => {
   };
 
   const handleFormSubmit = async () => {
+    const restaurantId = session?.user?.restaurantId || 0;
+
     const selectedPermissions = Object.keys(formData.permissions)
       .filter((key) => formData.permissions[key])
       .map((key) => {
@@ -155,7 +157,9 @@ const RolePage = () => {
     try {
       await createRoleWithPermissions(
         formData.name,
-        selectedPermissions
+        restaurantId,
+        selectedPermissions,
+
       );
       await fetchRoles();
       toast.success("Role created successfully!");

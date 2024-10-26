@@ -1,200 +1,204 @@
-'use client'
-import React, { useState } from 'react';
-import { Box, Button, Checkbox, FormControlLabel, FormGroup, TextField, Typography } from '@mui/material';
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import styled from "@emotion/styled";
-import AddIcon from "@mui/icons-material/Add";
+"use client";
 
-const VisuallyHiddenInput = styled("input")({
-  clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
-  height: 1,
-  overflow: "hidden",
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  whiteSpace: "nowrap",
-  width: 1,
-});
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import Image from "next/image";
+import {
+  Box,
+  TextField,
+  Typography,
+  Button,
+  CircularProgress,
+} from "@mui/material";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-function AddMenu() {
-  const [extraToppings, setExtraToppings] = useState<string[]>([]);
-  const [checkedToppings, setCheckedToppings] = useState<string[]>([
-    "Mozzarella",
-    "Onions",
-    "Bell Peppers",
-    "Olives"
-  ]);
+// Define the form data schema
+interface FormData {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  adminName: string;
+  phoneNumber: string;
+  acceptTerms: boolean;
+}
 
-  
-  const handleAddTopping = () => {
-    setExtraToppings([...extraToppings, ""]);
+// Zod validation schema
+const registrationSchema = z
+  .object({
+    email: z.string().email({ message: "Invalid email address" }),
+    password: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters" }),
+    confirmPassword: z
+      .string()
+      .min(6, { message: "Confirm password must be at least 6 characters" }),
+    adminName: z.string().min(1, { message: "Admin Name is required" }),
+    phoneNumber: z
+      .string()
+      .min(10, { message: "Phone number must be at least 10 digits" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+// Main component
+const AddAdminForm = () => {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  // React Hook Form setup
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(registrationSchema),
+  });
+
+  // onSubmit handler with session data validation
+  const onSubmit = async (data: FormData) => {
+    setLoading(true);
+
+    // Retrieve session data (replace with secure storage method in production)
+    const sessionData = JSON.parse(localStorage.getItem("sessionData") || "{}");
+
+    // Validate session data
+    if (
+      data.email === sessionData.email &&
+      data.password === sessionData.password &&
+      data.adminName === sessionData.adminName
+    ) {
+      console.log("Session data matches input data");
+
+      try {
+        const response = await fetch("/api/user", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+          router.push("/login");
+        } else {
+          console.error("Registration Failed");
+        }
+      } catch (error) {
+        console.error("Error during registration:", error);
+      }
+    } else {
+      alert("Provided data does not match session data.");
+    }
+
+    setLoading(false);
   };
-
-  const handleCheckboxChange = (topping: string) => {
-    setCheckedToppings((prev) =>
-      prev.includes(topping) ? prev.filter((t) => t !== topping) : [...prev, topping]
-    );
-  };
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const data = {
-      name: formData.get('Name') as string,
-      price: formData.get('Price') as string,
-      toppings: [
-        ...checkedToppings, 
-        ...extraToppings.filter((topping) => topping.trim() !== ""), 
-      ],
-    };
-    console.log('Form submitted:', data);
-
-  }
 
   return (
     <Box
-      component={"form"}
-      onSubmit={handleSubmit}
+      component="form"
+      onSubmit={handleSubmit(onSubmit)}
       sx={{
         display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        justifyContent: "center",
-        alignContent: "center",
-        width: "100%",
-        height: "100%",
-        mx: "auto",
-        mt: 9,
-        backgroundColor: "white",
+        flexDirection: { xs: "column", md: "row" },
+        gap: 3,
         alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+        width: "100%",
       }}
     >
-      <Box sx={{ width: "40%", m: "auto", display: "flex", flexDirection: "column", gap: 2 }}>
-        <Typography sx={{ alignSelf: "center", fontSize: "1.3rem" }}>Add Menu</Typography>
-        <TextField label={"Name"} type={"text"} name={"Name"} />
+      {/* Image section */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#FFA500",
+          height: { xs: "150px", md: "100%" },
+          width: { xs: "100%", md: "50%" },
+        }}
+      >
+        <Image
+          src={"/emojione_pizza.png"}
+          width={150}
+          height={150}
+          alt="pizza_img"
+        />
+      </Box>
 
-        <Typography sx={{ fontSize: "1.4rem", color: "gray", alignSelf: "start" }}>Topping</Typography>
-        <FormGroup sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
-          {/* Predefined Checkboxes */}
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={checkedToppings.includes("Mozzarella")}
-                onChange={() => handleCheckboxChange("Mozzarella")}
-                sx={{
-                  "& .MuiSvgIcon-root": { color: "#FFA500" },
-                  "&.Mui-checked .MuiSvgIcon-root": { color: "#FFA500" },
-                }}
-              />
-            }
-            label="Mozzarella"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={checkedToppings.includes("Onions")}
-                onChange={() => handleCheckboxChange("Onions")}
-                sx={{
-                  "& .MuiSvgIcon-root": { color: "#FFA500" },
-                  "&.Mui-checked .MuiSvgIcon-root": { color: "#FFA500" },
-                }}
-              />
-            }
-            label="Onions"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={checkedToppings.includes("Bell Peppers")}
-                onChange={() => handleCheckboxChange("Bell Peppers")}
-                sx={{
-                  "& .MuiSvgIcon-root": { color: "#FFA500" },
-                  "&.Mui-checked .MuiSvgIcon-root": { color: "#FFA500" },
-                }}
-              />
-            }
-            label="Bell Peppers"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={checkedToppings.includes("Olives")}
-                onChange={() => handleCheckboxChange("Olives")}
-                sx={{
-                  "& .MuiSvgIcon-root": { color: "#FFA500" },
-                  "&.Mui-checked .MuiSvgIcon-root": { color: "#FFA500" },
-                }}
-              />
-            }
-            label="Olives"
-          />
-          {/* Button to add new text field */}
-          <Button
-            sx={{ width: 30, height: 30, minWidth: 30, backgroundColor: "#FFA500" }}
-            variant="contained"
-            onClick={handleAddTopping}
-          >
-            <AddIcon fontSize="small" />
-          </Button>
-        </FormGroup>
-
-        {/* Render additional text fields for new toppings */}
-        {extraToppings.map((topping, index) => (
+      {/* Form fields */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
+          alignItems: "flex-start",
+          justifyContent: "center",
+          height: "90%",
+          width: { xs: "100%", md: "50%" },
+          px: 2,
+        }}
+      >
+        {[
+          { label: "Admin Name", name: "adminName", type: "text" },
+          { label: "Email Address", name: "email", type: "email" },
+          { label: "Phone Number", name: "phoneNumber", type: "text" },
+          { label: "Password", name: "password", type: "password" },
+          {
+            label: "Confirm Password",
+            name: "confirmPassword",
+            type: "password",
+          },
+        ].map(({ label, name, type }) => (
           <TextField
-            key={index}
-            label={`Additional Topping ${index + 1}`}
-            type={"text"}
-            size="small" // Small size for the added fields
-            sx={{ width: 200, alignSelf: "start" }}
-            value={topping}
-            onChange={(e) => {
-              const updatedToppings = [...extraToppings];
-              updatedToppings[index] = e.target.value;
-              setExtraToppings(updatedToppings);
-            }}
+            key={name}
+            label={label}
+            type={type}
+            {...register(name as keyof FormData)}
+            error={Boolean(errors[name as keyof FormData])}
+            helperText={errors[name as keyof FormData]?.message}
+            sx={{ width: { xs: "100%", md: 450 }, mb: 2 }}
           />
         ))}
 
-        <TextField label={"Price"} type={"number"} name={"Price"} />
-        <Button
-          sx={{
-            color: "#FFA500",
-            borderStyle: "dotted",
-            borderColor: "black",
-            width: 200,
-            height: 50,
-            alignSelf: "center",
-          }}
-          component="label"
-          variant="outlined"
-          role={undefined}
-          tabIndex={-1}
-          startIcon={<CloudUploadIcon sx={{ color: "#FFA500" }} />}
+        <Typography
+          variant="body2"
+          color="error"
+          sx={{ mb: 2 }}
         >
-          Upload files
-          <VisuallyHiddenInput
-            type="file"
-            onChange={(event) => console.log(event.target.files)}
-            multiple
-          />
-        </Button>
+          {errors.acceptTerms?.message}
+        </Typography>
+
+        {/* Submit button */}
         <Button
-          type='submit'
+          type="submit"
+          variant="contained"
+          color="primary"
+          disabled={loading}
           sx={{
-            color: "white",
-            backgroundColor: "#FFA500",
-            width: 200,
+            width: { xs: "100%", md: 450 },
             height: 50,
-            borderRadius: 5,
-            alignSelf: "center",
+            fontSize: "1rem",
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: loading ? "#FF8C00" : "#FFA500",
+            "&:hover": { backgroundColor: loading ? "#FF8C00" : "#FF7F00" },
           }}
+          startIcon={
+            loading ? (
+              <CircularProgress size={18} sx={{ color: "#ffffff" }} />
+            ) : null
+          }
         >
-          Submit
+          {loading ? "CONTINUE..." : "CONTINUE"}
         </Button>
       </Box>
     </Box>
   );
-}
+};
 
-export default AddMenu;
+export default AddAdminForm;
