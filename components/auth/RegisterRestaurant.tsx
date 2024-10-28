@@ -16,7 +16,7 @@ import React, { useState, useRef } from "react";
 import { styled } from "@mui/system";
 import { useRouter } from "next/navigation";
 import { useActionStateCompat } from "@strozw/use-action-state-compat";
-import { expermantal } from "@/actions/adminAction";
+import { handleCreateRestaurant } from "@/actions/adminAction";
 import LoadingButton from "@mui/lab/LoadingButton";
 import Link from "next/link";
 
@@ -39,7 +39,7 @@ export default function RegisterRestaurant() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [state, executeAction, isPending] = useActionStateCompat(
-    expermantal,
+    handleCreateRestaurant,
     null
   );
 
@@ -47,8 +47,20 @@ export default function RegisterRestaurant() {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-    executeAction(formData);
+     executeAction(formData); // Await the executeAction call
+
+    // if (state && state.success) { // Check the state directly
+    //   const restaurantId = state.restaurantId;
+    //   ref.current?.reset();
+    //   router.push(`/addadmin?restaurantId=${restaurantId}`);
+    // }
   };
+
+  if (state && state.success) { // Check the state directly
+    const restaurantId = state.restaurant;
+    ref.current?.reset();
+    router.push(`/addadmin?restaurantId=${restaurantId}`);
+  }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -56,11 +68,6 @@ export default function RegisterRestaurant() {
       setSelectedFile(files[0]);
     }
   };
-
-  if (state?.success) {
-    ref.current?.reset();
-    router.push("/login");
-  }
 
   return (
     <Box
@@ -78,7 +85,6 @@ export default function RegisterRestaurant() {
         width: "100%",
       }}
     >
-      {/* Left Pizza Icon Box */}
       <Box
         sx={{
           display: "flex",
@@ -97,7 +103,6 @@ export default function RegisterRestaurant() {
         />
       </Box>
 
-      {/* Right Input Fields Box */}
       <Box
         sx={{
           display: "flex",
@@ -110,7 +115,6 @@ export default function RegisterRestaurant() {
           px: 1,
         }}
       >
-        {/* Icon and Title */}
         <Box
           sx={{
             display: "flex",
@@ -142,7 +146,6 @@ export default function RegisterRestaurant() {
 
         <Divider sx={{ fontSize: "1rem", color: "black" }} />
 
-        {/* Input Fields */}
         {[
           { label: "Admin Name", name: "name", type: "text" },
           { label: "Email Address", name: "email", type: "email" },
@@ -174,7 +177,6 @@ export default function RegisterRestaurant() {
           </Box>
         ))}
 
-        {/* File Upload Button */}
         {selectedFile?.name}
         <Button
           sx={{
@@ -206,7 +208,6 @@ export default function RegisterRestaurant() {
           sx={{ alignSelf: "start", pl: { xs: 0, md: 9 } }}
         />
 
-        {/* Sign Up Button */}
         <LoadingButton
           variant="contained"
           type="submit"

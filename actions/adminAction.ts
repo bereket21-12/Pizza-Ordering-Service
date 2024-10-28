@@ -3,15 +3,14 @@ import {
   createPizza,
   createRestaurantWithAdmin,
   createTopping,
-  createUser,
   orderPizza,
 } from "@/repositories";
 import bcrypt from "bcryptjs";
-import { MenuSchema, restaurantSchema, signUpSchema } from "../utils/schema";
+import { adminSchema, MenuSchema, restaurantSchema, signUpSchema } from "../utils/schema";
 import { uploadImage } from "./uploadImage";
 import prisma from "@/lib/prisma";
 import { OrderStatus, User } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+
 
 export async function handleCreateRestaurant(
   previousState: any,
@@ -37,7 +36,7 @@ export async function handleCreateRestaurant(
     formValues.imgUrl = new File([uploadedImageUrl], formValues.imgUrl.name, {
       type: formValues.imgUrl.type,
     });
-    // Validate the form values using the schema
+    
   }
 
   if (!results.success) {
@@ -46,29 +45,23 @@ export async function handleCreateRestaurant(
 
   const { confirmPassword, email, password, ...restaurantData } = results.data;
 
-  // Hash the admin's password
+  
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Create both restaurant and admin user in a single transaction
+  // Create  restaurant 
   try {
     const newRestaurant = await createRestaurantWithAdmin({
       name: restaurantData.RestaurantName || "",
       location: restaurantData.location || "",
       imgUrl: uploadedImageUrl,
+      adminName: restaurantData.name,
+      phoneNumber: restaurantData.phoneNumber || "",
+      email: email,
 
-      superAdmin: {
-        create: {
-          email: email,
-          password: hashedPassword,
-          name: restaurantData.name,
-          location: restaurantData.location,
-          phoneNumber: restaurantData.phoneNumber || "",
-        },
-      },
     });
 
-    console.log("Restaurant and Admin created successfully", newRestaurant);
-    return { ...previousState, success: true, restaurant: newRestaurant };
+    
+    return { ...previousState, success: true, restaurant: newRestaurant.id };
   } catch (error) {
     console.error("Error creating restaurant and admin", error);
     return {
@@ -155,6 +148,7 @@ export async function handleCreateMenu(previousState: any, formData: FormData) {
   }
 }
 
+
 export async function expermantal(previousState: any, formData: FormData) {
   console.log("formData", formData);
 
@@ -202,6 +196,9 @@ export async function expermantal(previousState: any, formData: FormData) {
       name: restaurantData.RestaurantName || "",
       location: restaurantData.location || "",
       imgUrl: uploadedImageUrl,
+      adminName: restaurantData.name,
+      phoneNumber: restaurantData.phoneNumber || "",
+      email: email,
     });
 
     console.log("Restaurant created successfully", newRestaurant);
@@ -226,7 +223,7 @@ export async function expermantal(previousState: any, formData: FormData) {
         name: restaurantData.name,
         location: restaurantData.location,
         phoneNumber: restaurantData.phoneNumber || "",
-        restaurantId: newRestaurant.id, // Link the admin to the created restaurant
+        restaurantId: newRestaurant.id, 
         superAdminRestaurants: {
           connect: {
             id: newRestaurant.id,
@@ -259,6 +256,87 @@ export async function expermantal(previousState: any, formData: FormData) {
     };
   }
 }
+
+export async function handleCreateAdmin(data: FormData) {
+
+
+
+
+  try {
+    
+    const parsedData = adminSchema.parse({
+      email: data.get("email"),
+      password: data.get("password"),
+      adminName: data.get("adminName"),
+      phoneNumber: data.get("phoneNumber"),
+      confirmPassword: data.get("confirmPassword"),
+      restaurantId: data.get("restaurantId"), 
+    });
+
+    const superAdminPermission = await prisma.permission.create({
+      data: {
+        action: "manage",
+        subject: "all",
+      },
+    });
+
+    const superAdminRole = await prisma.role.create({
+      data: {
+        name: "Super Admin",
+        restaurantId: Number(parsedData.restaurantId),
+        permissions: {
+          create: {
+            permissionId: superAdminPermission.id,
+          },
+        },
+      },
+    });
+
+    
+    if (parsedData.password !== parsedData.confirmPassword) {
+      return { success: false, message: "Passwords do not match" };
+    }
+
+    
+    const existingAdmin = await prisma.user.findUnique({
+      where: { email: parsedData.email },
+    });
+
+    if (existingAdmin) {
+      return { success: false, message: "Admin with this email already exists" };
+    }
+
+    
+    const hashedPassword = await bcrypt.hash(parsedData.password, 10); 
+
+    
+    const newAdmin = await prisma.user.create({
+      data: {
+        email: parsedData.email,
+        password: hashedPassword, 
+        name: parsedData.adminName,
+        phoneNumber: parsedData.phoneNumber,
+        restaurantId: Number(parsedData.restaurantId), 
+        superAdminRestaurants: {
+          connect: {
+            id: Number(parsedData.restaurantId),
+          },
+        },
+        roles: {
+          create: {
+            roleId: superAdminRole.id,
+          },
+        },
+      },
+    });
+
+    return { success: true, admin: newAdmin };
+  } catch (error) {
+    
+    return { success: false, message: error instanceof Error ? error.message : "An unknown error occurred" };
+  }
+}
+
 
 export async function handleOrderForm(previousState: any, formData: FormData) {
   // Extract values from the form data

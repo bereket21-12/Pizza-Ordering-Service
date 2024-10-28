@@ -50,3 +50,12 @@ export const MenuSchema = z.object({
   name: z.string().min(3, "Suber Admin name must be at least 3 characters"),
   price: z.string().min(1, "Phone number must be at least 1 digit."),
 });
+
+export const adminSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  adminName: z.string().min(1),
+  phoneNumber: z.string().min(10),
+  confirmPassword: z.string(),
+  restaurantId: z.string().min(1), // Ensure restaurantId is required
+});

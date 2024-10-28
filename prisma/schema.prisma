@@ -67,6 +67,9 @@ model RolePermission {
 model Restaurant {
   id                Int     @id @default(autoincrement())
   name              String
+  adminName         String
+  phoneNumber       String
+  email             String
   superAdminId      Int?
   imgUrl            String
   location          String

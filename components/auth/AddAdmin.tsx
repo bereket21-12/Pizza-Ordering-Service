@@ -7,14 +7,13 @@ import Image from "next/image";
 import {
   Box,
   TextField,
-  Typography,
   Button,
   CircularProgress,
 } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { handleCreateAdmin } from "@/actions/adminAction"; // Ensure to import the server action
 
-// Define the form data schema
 interface FormData {
   email: string;
   password: string;
@@ -24,7 +23,7 @@ interface FormData {
   acceptTerms: boolean;
 }
 
-// Zod validation schema
+
 const registrationSchema = z
   .object({
     email: z.string().email({ message: "Invalid email address" }),
@@ -44,12 +43,14 @@ const registrationSchema = z
     path: ["confirmPassword"],
   });
 
-// Main component
+
 const AddAdminForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const restaurantId = searchParams.get("restaurantId"); // Get restaurantId from query parameters
   const [loading, setLoading] = useState(false);
 
-  // React Hook Form setup
+  
   const {
     register,
     handleSubmit,
@@ -58,41 +59,33 @@ const AddAdminForm = () => {
     resolver: zodResolver(registrationSchema),
   });
 
-  // onSubmit handler with session data validation
+ 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
-
-    // Retrieve session data (replace with secure storage method in production)
-    const sessionData = JSON.parse(localStorage.getItem("sessionData") || "{}");
-
-    // Validate session data
-    if (
-      data.email === sessionData.email &&
-      data.password === sessionData.password &&
-      data.adminName === sessionData.adminName
-    ) {
-      console.log("Session data matches input data");
-
-      try {
-        const response = await fetch("/api/user", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-
-        if (response.ok) {
-          router.push("/login");
-        } else {
-          console.error("Registration Failed");
-        }
-      } catch (error) {
-        console.error("Error during registration:", error);
+    try {
+      
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      if (restaurantId) {
+        formData.append("restaurantId", restaurantId as string); 
       }
-    } else {
-      alert("Provided data does not match session data.");
-    }
 
-    setLoading(false);
+      const result = await handleCreateAdmin(formData); 
+
+      if (result.success) {
+        
+        router.push("/login");
+      } else {
+      
+        console.error(result.message);
+      }
+    } catch (error) {
+      console.error("Error creating admin:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -109,7 +102,7 @@ const AddAdminForm = () => {
         width: "100%",
       }}
     >
-      {/* Image section */}
+      
       <Box
         sx={{
           display: "flex",
@@ -128,7 +121,7 @@ const AddAdminForm = () => {
         />
       </Box>
 
-      {/* Form fields */}
+     
       <Box
         sx={{
           display: "flex",
@@ -163,15 +156,7 @@ const AddAdminForm = () => {
           />
         ))}
 
-        <Typography
-          variant="body2"
-          color="error"
-          sx={{ mb: 2 }}
-        >
-          {errors.acceptTerms?.message}
-        </Typography>
-
-        {/* Submit button */}
+        
         <Button
           type="submit"
           variant="contained"
