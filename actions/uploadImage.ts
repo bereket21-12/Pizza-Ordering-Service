@@ -1,6 +1,6 @@
 "use server";
 
-import cloudinary from "../utils/cloudinary";
+import cloudinary from "../utils/cloudinary.ts";
 import streamifier from "streamifier";
 
 export async function uploadImage(file: File, folderName: string) {

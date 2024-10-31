@@ -1,7 +1,9 @@
 "use server";
-import prisma from "@/lib/prisma";
-import { signUpSchema } from "../utils/schema"; // Adjust import based on your folder structure
-import { createUser, getAllPizzas } from "@/repositories";
+import prisma from "../lib/prisma.ts";
+import { signUpSchema } from "../utils/schema.ts"; // Adjust import based on your folder structure
+// import { createUser, getAllPizzas } from "@/repositories";
+import { createUser } from "../repositories/user.ts";
+import { getAllPizzas } from "../repositories/admin.ts";
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
 import bcrypt from "bcryptjs";
 
@@ -108,28 +110,36 @@ export async function orderPizzaById(id: number) {
 }
 
 export async function getOrdersByUser(userId: number) {
-  const userOrders = await prisma.order.findMany({
-    where: {
-      customerId: userId,
-    },
-    select: {
-      customer: true, // Includes user details in the result
-      Pizza: true,
-      status: true,
-      toppings: {
-        select: {
-          topping: {
-            select: {
-              name: true,
+  try {
+    const userOrders = await prisma.order.findMany({
+      where: {
+        customerId: userId,
+      },
+      select: {
+        customer: true,
+        Pizza: true,
+        status: true,
+        toppings: {
+          select: {
+            topping: {
+              select: {
+                name: true,
+              },
             },
           },
         },
       },
-      // Includes pizza details for each order
-    },
-  });
+    });
 
-  return userOrders;
+    if (userOrders.length === 0) {
+      return { success: false, error: "Could not retrieve user orders" };
+    }
+
+    return { success: true, userOrders };
+  } catch (error) {
+    console.error("Error fetching user orders", error);
+    return { success: false, error: "Could not retrieve user orders" };
+  }
 }
 
 export async function getOrders(id: number) {
@@ -171,7 +181,6 @@ export const searchPizza = async (query: string) => {
         mode: "insensitive",
       },
     },
- 
   });
 
   return pizzas;

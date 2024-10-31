@@ -1,5 +1,5 @@
 "use server";
-import prisma from "../lib/prisma";
+import prisma from "../lib/prisma.ts";
 import { Prisma } from "@prisma/client";
 export const createUser = async (data: Prisma.UserCreateInput) => {
   return prisma.user.create({

@@ -3,6 +3,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
     "strict": true,
     "target": "es2015",
     "noEmit": true,
@@ -23,6 +24,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/cache/material-react-table.d.ts", "prisma/seed.mjs"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/cache/material-react-table.d.ts", "prisma/seed.mjs","features/**/*.ts","features/**/*.feature", "features/step_definitions/order_pizza..stepsts"],
   "exclude": ["node_modules"]
 }

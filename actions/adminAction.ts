@@ -1,16 +1,24 @@
 "use server";
-import {
-  createPizza,
-  createRestaurantWithAdmin,
-  createTopping,
-  orderPizza,
-} from "@/repositories";
+// import {
+//   createPizza,
+//   createRestaurantWithAdmin,
+//   createTopping,
+//   orderPizza,
+// } from "@/repositories";
+import { createPizza } from "../repositories/admin.ts";
+import { createRestaurantWithAdmin } from "../repositories/admin.ts";
+import { orderPizza } from "../repositories/user.ts";
+import { createTopping } from "../repositories/admin.ts";
 import bcrypt from "bcryptjs";
-import { adminSchema, MenuSchema, restaurantSchema, signUpSchema } from "../utils/schema";
-import { uploadImage } from "./uploadImage";
-import prisma from "@/lib/prisma";
+import {
+  adminSchema,
+  MenuSchema,
+  restaurantSchema,
+  signUpSchema,
+} from "../utils/schema.ts";
+import { uploadImage } from "./uploadImage.ts";
+import prisma from "../lib/prisma.ts";
 import { OrderStatus, User } from "@prisma/client";
-
 
 export async function handleCreateRestaurant(
   previousState: any,
@@ -36,7 +44,6 @@ export async function handleCreateRestaurant(
     formValues.imgUrl = new File([uploadedImageUrl], formValues.imgUrl.name, {
       type: formValues.imgUrl.type,
     });
-    
   }
 
   if (!results.success) {
@@ -45,10 +52,9 @@ export async function handleCreateRestaurant(
 
   const { confirmPassword, email, password, ...restaurantData } = results.data;
 
-  
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Create  restaurant 
+  // Create  restaurant
   try {
     const newRestaurant = await createRestaurantWithAdmin({
       name: restaurantData.RestaurantName || "",
@@ -57,10 +63,8 @@ export async function handleCreateRestaurant(
       adminName: restaurantData.name,
       phoneNumber: restaurantData.phoneNumber || "",
       email: email,
-
     });
 
-    
     return { ...previousState, success: true, restaurant: newRestaurant.id };
   } catch (error) {
     console.error("Error creating restaurant and admin", error);
@@ -79,7 +83,7 @@ export async function handleCreateMenu(previousState: any, formData: FormData) {
     name: formData.get("name") as string,
     price: formData.get("price") as string,
     imgUrl: formData.get("image") as File,
-    restaurantId:formData.get("id") 
+    restaurantId: formData.get("id"),
   };
 
   const results = MenuSchema.safeParse(formValues);
@@ -147,7 +151,6 @@ export async function handleCreateMenu(previousState: any, formData: FormData) {
     };
   }
 }
-
 
 export async function expermantal(previousState: any, formData: FormData) {
   console.log("formData", formData);
@@ -223,7 +226,7 @@ export async function expermantal(previousState: any, formData: FormData) {
         name: restaurantData.name,
         location: restaurantData.location,
         phoneNumber: restaurantData.phoneNumber || "",
-        restaurantId: newRestaurant.id, 
+        restaurantId: newRestaurant.id,
         superAdminRestaurants: {
           connect: {
             id: newRestaurant.id,
@@ -258,19 +261,14 @@ export async function expermantal(previousState: any, formData: FormData) {
 }
 
 export async function handleCreateAdmin(data: FormData) {
-
-
-
-
   try {
-    
     const parsedData = adminSchema.parse({
       email: data.get("email"),
       password: data.get("password"),
       adminName: data.get("adminName"),
       phoneNumber: data.get("phoneNumber"),
       confirmPassword: data.get("confirmPassword"),
-      restaurantId: data.get("restaurantId"), 
+      restaurantId: data.get("restaurantId"),
     });
 
     const superAdminPermission = await prisma.permission.create({
@@ -292,31 +290,30 @@ export async function handleCreateAdmin(data: FormData) {
       },
     });
 
-    
     if (parsedData.password !== parsedData.confirmPassword) {
       return { success: false, message: "Passwords do not match" };
     }
 
-    
     const existingAdmin = await prisma.user.findUnique({
       where: { email: parsedData.email },
     });
 
     if (existingAdmin) {
-      return { success: false, message: "Admin with this email already exists" };
+      return {
+        success: false,
+        message: "Admin with this email already exists",
+      };
     }
 
-    
-    const hashedPassword = await bcrypt.hash(parsedData.password, 10); 
+    const hashedPassword = await bcrypt.hash(parsedData.password, 10);
 
-    
     const newAdmin = await prisma.user.create({
       data: {
         email: parsedData.email,
-        password: hashedPassword, 
+        password: hashedPassword,
         name: parsedData.adminName,
         phoneNumber: parsedData.phoneNumber,
-        restaurantId: Number(parsedData.restaurantId), 
+        restaurantId: Number(parsedData.restaurantId),
         superAdminRestaurants: {
           connect: {
             id: Number(parsedData.restaurantId),
@@ -332,25 +329,25 @@ export async function handleCreateAdmin(data: FormData) {
 
     return { success: true, admin: newAdmin };
   } catch (error) {
-    
-    return { success: false, message: error instanceof Error ? error.message : "An unknown error occurred" };
+    return {
+      success: false,
+      message:
+        error instanceof Error ? error.message : "An unknown error occurred",
+    };
   }
 }
 
-
 export async function handleOrderForm(previousState: any, formData: FormData) {
-  // Extract values from the form data
   const formValues = {
     customerId: Number(formData.get("userId")),
-    quantity: Number(formData.get("quantity")), // User ID
-    pizzaId: Number(formData.get("pizzaId")), // Pizza ID
-    restaurantId: Number(formData.get("restaurantId")), // Restaurant ID
-    toppings: JSON.parse(formData.get("checkedToppings") as string), // Parse array directly
+    quantity: Number(formData.get("quantity")),
+    pizzaId: Number(formData.get("pizzaId")),
+    restaurantId: Number(formData.get("restaurantId")),
+    toppings: JSON.parse(formData.get("checkedToppings") as string),
   };
 
   console.log("Parsed Form Data:", formValues);
 
-  // Check for missing fields or validation errors
   if (
     !formValues.customerId ||
     !formValues.pizzaId ||
@@ -366,7 +363,6 @@ export async function handleOrderForm(previousState: any, formData: FormData) {
 
   let toppings;
   try {
-    // Validate toppings as an array of numbers
     toppings = formValues.toppings;
     if (
       !Array.isArray(toppings) ||
@@ -382,7 +378,6 @@ export async function handleOrderForm(previousState: any, formData: FormData) {
   }
 
   try {
-    // Create the order data in the required format
     const orderData = {
       customer: { connect: { id: formValues.customerId } },
       Pizza: { connect: { id: formValues.pizzaId } },
@@ -392,7 +387,7 @@ export async function handleOrderForm(previousState: any, formData: FormData) {
       toppings: {
         create: toppings.map((toppingId) => ({
           topping: {
-            connect: { id: Number(toppingId) }, // Ensure topping ID is a number
+            connect: { id: Number(toppingId) },
           },
         })),
       },
@@ -416,7 +411,7 @@ export async function handleOrderForm(previousState: any, formData: FormData) {
 
 export const createRoleWithPermissions = async (
   roleName: string,
-  id:number,
+  id: number,
   permissions: { action: string; subject: string }[]
 ) => {
   // Step 1: Ensure all permissions exist before creating the role
@@ -507,7 +502,7 @@ export const getRole = async (id: number) => {
     select: {
       name: true,
       id: true,
-      Active:true,
+      Active: true,
       createdAt: true,
       permissions: {
         select: {
@@ -578,7 +573,7 @@ export const getUserByRestaurant = async (restaurantId: number) => {
     },
     select: {
       id: true,
-      Active:true,
+      Active: true,
       name: true,
       email: true,
       location: true,
@@ -659,14 +654,20 @@ export const updateOrderStatus = async (
   orderId: number,
   status: OrderStatus
 ) => {
-  return await prisma.order.update({
-    where: {
-      id: orderId,
-    },
-    data: {
-      status,
-    },
-  });
+  try {
+    const response = await prisma.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        status,
+      },
+    });
+
+    return { success: true, response };
+  } catch (error) {
+    return { success: false, error: "Could not update order status" };
+  }
 };
 
 export const updateUser = async (id: number, active: boolean) => {
@@ -696,12 +697,9 @@ export const UpdateRole = async (id: number, Active: boolean) => {
       Active,
     },
   });
-  
 };
 
-
-
-export const searchRole = async (name: string,id:number) => {
+export const searchRole = async (name: string, id: number) => {
   return await prisma.role.findMany({
     where: {
       restaurantId: id,
@@ -729,7 +727,7 @@ export const searchRole = async (name: string,id:number) => {
   });
 };
 
-export const searchUser = async (name: string,id:number) => {
+export const searchUser = async (name: string, id: number) => {
   return await prisma.user.findMany({
     where: {
       restaurantId: id,
@@ -742,7 +740,7 @@ export const searchUser = async (name: string,id:number) => {
       email: true,
       name: true,
       phoneNumber: true,
-      Active:true,
+      Active: true,
       roles: {
         select: {
           role: {
@@ -756,8 +754,7 @@ export const searchUser = async (name: string,id:number) => {
   });
 };
 
-
-export const searchOrder = async (name: string,id:number) => {
+export const searchOrder = async (name: string, id: number) => {
   return await prisma.order.findMany({
     where: {
       restaurantId: id,
@@ -774,7 +771,7 @@ export const searchOrder = async (name: string,id:number) => {
           phoneNumber: true,
         },
       },
-      Pizza: true, 
+      Pizza: true,
     },
   });
 };

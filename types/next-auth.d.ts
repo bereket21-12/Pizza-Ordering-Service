@@ -39,3 +39,4 @@ declare module "next-auth" {
     restaurantId: number | null;
   }
 }
+export declare module "next-auth" {}
