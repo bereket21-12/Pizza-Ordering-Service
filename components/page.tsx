@@ -14,8 +14,8 @@ import { orderPizzaById } from "@/actions/userAction";
 import toast from "react-hot-toast";
 import { Modal, Typography } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { SwiperSlide } from "swiper/react";
-import { Swiper } from "swiper/react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/swiper-bundle.css";
 
 const defaualtImage = ["/Image (1).png"];
 let uniqueArray = Array.from(new Set(defaualtImage));
@@ -295,35 +295,35 @@ function Page() {
         </Box>
 
         <Heading heading={"Related"} />
-        <Box
+        {/* <Box
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", md: "row" },
+            flexDirection: "row",
             flexWrap: "wrap",
-            justifyContent: "flex-start",
-            gap: { xs: 1, md: 2 },
+            // justifyContent: "flex-start",
+            gap: 2,
             p: 5,
           }}
+        > */}
+        <Swiper
+          spaceBetween={10}
+          pagination={{ clickable: true }}
+          breakpoints={{
+            640: {
+              slidesPerView: 1,
+            },
+            1024: {
+              slidesPerView: 3,
+            },
+          }}
         >
-         <Swiper
-                spaceBetween={10}
-                pagination={{ clickable: true }}
-                breakpoints={{
-                  640: {
-                    slidesPerView: 1,
-                  },
-                  1024: {
-                    slidesPerView: 3,
-                  },
-                }}
-              >
-               {  Array.from({ length: 12 }).map((_, index) => (
-                  <SwiperSlide key={index}>
-                  <Related key={index} />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-        </Box>
+          {Array.from({ length: 12 }).map((_, index) => (
+            <SwiperSlide key={index}>
+              <Related key={index} />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+        {/* </Box> */}
         <Modal
           open={showSuccessModal}
           onClose={() => setShowSuccessModal(false)}
