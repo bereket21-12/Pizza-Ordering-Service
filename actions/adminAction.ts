@@ -18,7 +18,7 @@ import {
 } from "../utils/schema.ts";
 import { uploadImage } from "./uploadImage.ts";
 import prisma from "../lib/prisma.ts";
-import { OrderStatus, User } from "@prisma/client";
+import { OrderStatus, Prisma, User } from "@prisma/client";
 
 export async function handleCreateRestaurant(
   previousState: any,
@@ -699,60 +699,174 @@ export const UpdateRole = async (id: number, Active: boolean) => {
   });
 };
 
-export const searchRole = async (name: string, id: number) => {
-  return await prisma.role.findMany({
-    where: {
-      restaurantId: id,
-      name: {
-        contains: name,
-        mode: "insensitive",
-      },
-    },
-    select: {
-      id: true,
-      name: true,
-      createdAt: true,
-      Active: true,
-      permissions: {
-        select: {
-          permission: {
-            select: {
-              action: true,
-              subject: true,
-            },
-          },
-        },
-      },
-    },
-  });
-};
+export async function updateRoleWithPermissions(
+  roleId: number,
+  name: string,
+  permissions: { action: string; subject: string }[]
+) {
+  try {
+    // Update the role name
+    const updatedRole = await prisma.role.update({
+      where: { id: roleId },
+      data: { name },
+    });
 
-export const searchUser = async (name: string, id: number) => {
-  return await prisma.user.findMany({
-    where: {
-      restaurantId: id,
-      name: {
-        contains: name,
-        mode: "insensitive",
-      },
-    },
-    select: {
-      email: true,
-      name: true,
-      phoneNumber: true,
-      Active: true,
-      roles: {
-        select: {
-          role: {
-            select: {
-              name: true,
+    // Delete existing permissions
+    await prisma.rolePermission.deleteMany({
+      where: { roleId },
+    });
+
+    // Add new permissions
+    const newPermissions = await Promise.all(
+      permissions.map(async (perm) => {
+        let permission = await prisma.permission.findFirst({
+          where: {
+            action: perm.action,
+            subject: perm.subject,
+          },
+        });
+
+        if (!permission) {
+          permission = await prisma.permission.create({
+            data: { action: perm.action, subject: perm.subject },
+          });
+        }
+
+        return {
+          roleId,
+          permissionId: permission.id,
+        };
+      })
+    );
+
+    await prisma.rolePermission.createMany({
+      data: newPermissions,
+    });
+
+    return updatedRole;
+  } catch (error) {
+    console.error("Error updating role with permissions:", error);
+    throw new Error("Could not update role. Please try again later.");
+  }
+}
+
+export async function searchRole(
+  filters: {
+    name?: string;
+    // createdAt?: string;
+    active?: boolean;
+    global?: string;
+  },
+  restaurantId: number
+) {
+  const where: any = {
+    restaurantId: Number(restaurantId),
+  };
+
+  if (filters.name) {
+    where.name = { contains: filters.name, mode: "insensitive" };
+  }
+
+  if (filters.active) {
+    where.Active = { equals: filters.active };
+  }
+
+  if (filters.global) {
+    where.OR = [
+      { name: { contains: filters.global, mode: "insensitive" } },
+      // { createdAt: { equals: new Date(filters.global) } },
+    ];
+  }
+
+  console.log("Constructed where clause:", JSON.stringify(where, null, 2));
+
+  try {
+    return await prisma.role.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        Active: true,
+        permissions: {
+          select: {
+            permission: {
+              select: {
+                action: true,
+                subject: true,
+              },
             },
           },
         },
       },
-    },
-  });
-};
+    });
+  } catch (error) {
+    console.error("Error fetching roles:", error);
+    throw new Error("Could not fetch roles. Please try again later.");
+  }
+}
+
+// export const searchUser = async (name: string, id: number) => {
+//   return await prisma.user.findMany({
+//     where: {
+//       restaurantId: id,
+//       name: {
+//         contains: name,
+//         mode: "insensitive",
+//       },
+//     },
+//     select: {
+//       email: true,
+//       name: true,
+//       phoneNumber: true,
+//       Active: true,
+//       roles: {
+//         select: {
+//           role: {
+//             select: {
+//               name: true,
+//             },
+//           },
+//         },
+//       },
+//     },
+//   });
+// };
+
+export async function searchUser(
+  query: string | Record<string, any>,
+  restaurantId: number
+) {
+  try {
+    let whereClause: any = { restaurantId };
+
+    if (typeof query === "string") {
+      whereClause.OR = [
+        { name: { contains: query, mode: "insensitive" } },
+        { email: { contains: query, mode: "insensitive" } },
+        { phoneNumber: { contains: query, mode: "insensitive" } },
+      ];
+    } else {
+      whereClause = { ...whereClause, ...query };
+    }
+
+    const users = await prisma.user.findMany({
+      where: whereClause,
+      include: {
+        roles: {
+          include: {
+            role: true,
+          },
+        },
+      },
+    });
+
+    return users;
+  } catch (error) {
+    console.error("Error searching users:", error);
+    throw new Error("Could not search users. Please try again later.");
+  }
+}
 
 export const searchOrder = async (name: string, id: number) => {
   return await prisma.order.findMany({
@@ -765,13 +879,112 @@ export const searchOrder = async (name: string, id: number) => {
         },
       },
     },
-    include: {
+    select: {
+      id: true,
+      quantity: true,
+      status: true,
       customer: {
         select: {
+          name: true,
+          email: true,
+          location: true,
           phoneNumber: true,
         },
       },
-      Pizza: true,
+      Pizza: {
+        select: {
+          name: true,
+        },
+      },
+      toppings: {
+        include: {
+          topping: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
     },
   });
 };
+
+export async function searchOrderColumen(
+  filters: {
+    status?: string;
+    customerPhone?: string;
+    pizzaName?: string;
+    global?: string;
+  },
+  restaurantId: number
+) {
+  const where: Prisma.OrderWhereInput = {
+    restaurantId: Number(restaurantId),
+  };
+
+  if (filters.status) {
+    where.status = { equals: filters.status as OrderStatus };
+  }
+
+  if (filters.customerPhone) {
+    where.customer = {
+      phoneNumber: { contains: filters.customerPhone, mode: "insensitive" },
+    };
+  }
+
+  if (filters.pizzaName) {
+    where.Pizza = {
+      name: { contains: filters.pizzaName, mode: "insensitive" },
+    };
+  }
+
+  if (filters.global) {
+    where.OR = [
+      {
+        customer: {
+          phoneNumber: { contains: filters.global, mode: "insensitive" },
+        },
+      },
+      { Pizza: { name: { contains: filters.global, mode: "insensitive" } } },
+    ];
+  }
+
+  console.log("Constructed where clause:", JSON.stringify(where, null, 2));
+  console.log("pizza name", filters.pizzaName);
+
+  try {
+    return await prisma.order.findMany({
+      where,
+      select: {
+        id: true,
+        quantity: true,
+        status: true,
+        customer: {
+          select: {
+            name: true,
+            email: true,
+            location: true,
+            phoneNumber: true,
+          },
+        },
+        Pizza: {
+          select: {
+            name: true,
+          },
+        },
+        toppings: {
+          include: {
+            topping: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    throw new Error("Could not fetch orders. Please try again later.");
+  }
+}

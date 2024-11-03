@@ -19,6 +19,7 @@ import {
   getOrder,
   updateOrderStatus,
   searchOrder,
+  searchOrderColumen,
 } from "@/actions/adminAction";
 import { useSession } from "next-auth/react";
 import { useAbility } from "@/provider/AbilityContext";
@@ -30,7 +31,6 @@ const ManageOrderPage: React.FC = () => {
   const [openToppingModal, setOpenToppingModal] = useState(false);
   const [openStatusModal, setOpenStatusModal] = useState(false);
   const [orders, setOrders] = useState<any[]>([]);
-  const [searchQuery] = useState("");
   const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus>("PENDING");
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
@@ -46,28 +46,66 @@ const ManageOrderPage: React.FC = () => {
     fetchOrders();
   }, [session]);
 
-  useEffect(() => {
-    if (searchQuery) {
-      handleSearch(searchQuery);
-    } else {
-      fetchOrders();
-    }
-  }, [searchQuery]);
-
-  const handleSearch = async (query: string) => {
-    console.log("Searching for:", query); // Log the search query
+  const handleFilterChange = async ({
+    filters,
+    globalFilter,
+  }: {
+    filters: { id: string; value: string | number | null }[];
+    globalFilter: string;
+  }) => {
+    console.log("Filtering orders:", filters, globalFilter);
     try {
       const restaurantId = session?.user?.restaurantId;
       if (typeof restaurantId === "number") {
-        const searchResults = await searchOrder(query, restaurantId);
-        console.log("Search results:", searchResults); // Log the search results
-        setOrders(searchResults);
+        let searchResults;
+        if (globalFilter) {
+          searchResults = await searchOrder(globalFilter, restaurantId);
+        } else if (filters.length > 0) {
+          const filterParams = filters.reduce(
+            (acc: Record<string, string | number | null>, filter) => {
+              const value = filter.value;
+              if (
+                typeof value === "string" ||
+                typeof value === "number" ||
+                value === null
+              ) {
+                switch (filter.id) {
+                  case "Pizza.name":
+                    acc.pizzaName = value;
+                    break;
+                  case "customer.phoneNumber":
+                    acc.customerPhone = value;
+                    break;
+                  case "status":
+                    acc.status = value;
+                    break;
+                  default:
+                    acc[filter.id] = value;
+                }
+              }
+              return acc;
+            },
+            {} as Record<string, string | number | null>
+          );
+
+          console.log(
+            "Filter params before calling searchOrderColumen:",
+            filterParams
+          );
+
+          searchResults = await searchOrderColumen(filterParams, restaurantId);
+          console.log("Column filter results:", searchResults);
+          setOrders(Array.isArray(searchResults) ? searchResults : []);
+        } else {
+          searchResults = await getOrder(restaurantId);
+        }
+        console.log("Filter results:", searchResults);
+        setOrders(Array.isArray(searchResults) ? searchResults : []);
       } else {
         console.error("Invalid restaurant ID:", restaurantId);
       }
-
     } catch (error) {
-      console.error("Failed to search orders:", error);
+      console.error("Failed to filter orders:", error);
     }
   };
 
@@ -109,11 +147,7 @@ const ManageOrderPage: React.FC = () => {
           ),
         }
       : null,
-  ].filter(Boolean) as Array<{
-    accessorKey: string;
-    header: string;
-    permission?: string;
-  }>;
+  ].filter(Boolean);
 
   const handleToppingClick = (toppings: any) => {
     const toppingNames = toppings.map((topping: any) => topping.topping.name);
@@ -146,7 +180,11 @@ const ManageOrderPage: React.FC = () => {
 
   return (
     <Box sx={{ pt: 14 }}>
-      <ReusableTable columns={columns} data={orders} onFilterChange={handleSearch} />
+      <ReusableTable
+        columns={columns}
+        data={orders}
+        onFilterChange={handleFilterChange}
+      />
 
       {/* Modal for Topping Details */}
       <Modal open={openToppingModal} onClose={handleCloseToppingModal}>

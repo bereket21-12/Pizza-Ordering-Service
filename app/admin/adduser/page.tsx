@@ -29,7 +29,7 @@ type UserData = {
   location: string | null;
   phoneNumber: string;
   role: string;
-  Active: boolean; 
+  Active: boolean;
 };
 
 const MyTable = () => {
@@ -59,7 +59,7 @@ const MyTable = () => {
         const transformedUsersData = usersData.map((user: any) => ({
           ...user,
           role: user.roles[0]?.role.name || "",
-          Active: user.Active || false, 
+          Active: user.Active || false,
         }));
         setUsers(transformedUsersData);
       } catch (error) {
@@ -97,11 +97,11 @@ const MyTable = () => {
     try {
       const id = Number(session?.user?.restaurantId);
 
-      const searchResults = await searchUser(query,id);
+      const searchResults = await searchUser(query, id);
       const transformedSearchResults = searchResults.map((user: any) => ({
         ...user,
         role: user.roles[0]?.role.name || "",
-        Active: user.Active || false, 
+        Active: user.Active || false,
       }));
       setUsers(transformedSearchResults);
     } catch (error) {
@@ -122,7 +122,85 @@ const MyTable = () => {
       console.error("Failed to update user status:", error);
       toast.error("Failed to update user status.");
     }
-  
+  };
+
+  const handleFilterChange = async ({
+    filters,
+    globalFilter,
+  }: {
+    filters: { id: string; value: string | number | null }[];
+    globalFilter: string;
+  }) => {
+    console.log("Filtering users:", filters, globalFilter);
+    try {
+      const restaurantId = session?.user?.restaurantId;
+      if (typeof restaurantId === "number") {
+        let searchResults;
+        if (globalFilter) {
+          searchResults = await searchUser(globalFilter, restaurantId);
+        } else if (filters.length > 0) {
+          const filterParams = filters.reduce(
+            (acc: Record<string, string | number | null>, filter) => {
+              const value = filter.value;
+              if (
+                typeof value === "string" ||
+                typeof value === "boolean" ||
+                value === null
+              ) {
+                switch (filter.id) {
+                  case "name":
+                    acc.name = value;
+                    break;
+                  case "email":
+                    acc.email = value;
+                    break;
+                  case "phoneNumber":
+                    acc.phoneNumber = value;
+                    break;
+                  case "Active":
+                    acc.Active = value;
+                    break;
+                  default:
+                    acc[filter.id] = value;
+                }
+              }
+              return acc;
+            },
+            {} as Record<string, string | number | null>
+          );
+
+          console.log("Filter params before calling searchUser:", filterParams);
+
+          searchResults = await searchUser(filterParams, restaurantId);
+          console.log("Column filter results:", searchResults);
+          setUsers(
+            Array.isArray(searchResults)
+              ? searchResults.map((user: any) => ({
+                  ...user,
+                  role: user.roles[0]?.role.name || "",
+                  Active: user.Active || false,
+                }))
+              : []
+          );
+        } else {
+          searchResults = await getUserByRestaurant(restaurantId);
+        }
+        console.log("Filter results:", searchResults);
+        setUsers(
+          Array.isArray(searchResults)
+            ? searchResults.map((user: any) => ({
+                ...user,
+                role: user.roles[0]?.role.name || "",
+                Active: user.Active || false,
+              }))
+            : []
+        );
+      } else {
+        console.error("Invalid restaurant ID:", restaurantId);
+      }
+    } catch (error) {
+      console.error("Failed to filter users:", error);
+    }
   };
 
   const columns = [
@@ -211,7 +289,7 @@ const MyTable = () => {
       <ReusableTable
         columns={columns}
         data={users}
-        onFilterChange={handleSearch}
+        onFilterChange={handleFilterChange}
         action="Add User"
         onAdd={() => setOpen(true)}
         onEdit={(user) => console.log("Edit user:", user)}

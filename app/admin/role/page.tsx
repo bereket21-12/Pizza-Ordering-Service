@@ -18,6 +18,7 @@ import {
   UpdateRole,
   deleteRole,
   searchRole,
+  updateRoleWithPermissions,
 } from "@/actions/adminAction";
 import toast from "react-hot-toast";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -29,15 +30,21 @@ type RoleData = {
   id: number;
   name: string;
   createdAt: string;
-  permissions: { action: string; subject: string }[];
-  Active: boolean;
+  permissions: {
+    permission: {
+      action: string;
+      subject: string;
+    };
+  }[];
+  active: boolean;
 };
 
 const RolePage = () => {
   const [open, setOpen] = useState(false);
   const [roles, setRoles] = useState<RoleData[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery] = useState("");
   const [formData, setFormData] = useState<{
+    id?: number;
     name: string;
     permissions: { [key: string]: boolean };
   }>({
@@ -49,11 +56,12 @@ const RolePage = () => {
     },
   });
   const { data: session } = useSession();
+
   const permissionsList = [
-    { label: "Update Order Status", action: "Update", subject: "Order" },
-    { label: "See Order", action: "read", subject: "Order" },
-    { label: "Add User", action: "create", subject: "User" },
-    { label: "See Customer", action: "read", subject: "Customer" },
+    { label: "Update Order Status", action: "update", subject: "order" },
+    { label: "See Order", action: "read", subject: "order" },
+    { label: "Add User", action: "create", subject: "user" },
+    { label: "See Customer", action: "read", subject: "customer" },
     { label: "Create Role", action: "create", subject: "role" },
   ];
 
@@ -66,8 +74,8 @@ const RolePage = () => {
         rolesData.map((role: any) => ({
           id: role.id,
           name: role.name,
-          createdAt: new Date(role.createdAt).toLocaleString(), // Format the date
-          Active: role.Active,
+          createdAt: new Date(role.createdAt).toLocaleString(),
+          active: role.Active,
           permissions: role.permissions,
         }))
       );
@@ -79,7 +87,11 @@ const RolePage = () => {
   const handleToggleActive = async (roleId: number, isActive: boolean) => {
     try {
       await UpdateRole(roleId, isActive);
-      await fetchRoles();
+      setRoles((prevRoles) =>
+        prevRoles.map((role) =>
+          role.id === roleId ? { ...role, active: isActive } : role
+        )
+      );
       toast.success("Role status updated successfully!");
     } catch (error) {
       console.error("Failed to update role status:", error);
@@ -100,14 +112,14 @@ const RolePage = () => {
 
   const handleSearch = async (query: string) => {
     try {
-      const restaurantId = session?.user?.restaurantId ?? 0; // Default to 0 if undefined
-      const searchResults = await searchRole(query, restaurantId);
+      const restaurantId = session?.user?.restaurantId ?? 0;
+      const searchResults = await searchRole({ global: query }, restaurantId);
       setRoles(
         searchResults.map((role: any) => ({
           id: role.id,
           name: role.name,
-          createdAt: new Date(role.createdAt).toLocaleString(), // Format the date
-          Active: role.Active,
+          createdAt: new Date(role.createdAt).toLocaleString(),
+          active: role.Active,
           permissions: role.permissions,
         }))
       );
@@ -140,8 +152,23 @@ const RolePage = () => {
     setOpen(true);
   };
 
-  const handleViewRole = (role: RoleData) => {
-    console.log("Viewing role:", role);
+  const handleEditRole = (role: RoleData) => {
+    const permissions = role.permissions.reduce(
+      (acc: { [key: string]: boolean }, perm) => {
+        console.log("perms", perm);
+        const { action, subject } = perm.permission; // Access action and subject directly
+        acc[`${action}${subject}`] = true;
+        return acc;
+      },
+      {}
+    );
+    setFormData({
+      id: role.id,
+      name: role.name,
+      permissions,
+    });
+    setOpen(true);
+    console.log("permission", permissions);
   };
 
   const handleFormSubmit = async () => {
@@ -150,23 +177,118 @@ const RolePage = () => {
     const selectedPermissions = Object.keys(formData.permissions)
       .filter((key) => formData.permissions[key])
       .map((key) => {
-        const [action, subject] = key.split(/(?=[A-Z])/);
+        const [action, ...subjectParts] = key.split(/(?=[A-Z])/);
+        const subject = subjectParts.join("").toLowerCase();
         return { action, subject: subject.toLowerCase() };
       });
 
     try {
-      await createRoleWithPermissions(
-        formData.name,
-        restaurantId,
-        selectedPermissions,
-
-      );
+      if (formData.id) {
+        await updateRoleWithPermissions(
+          formData.id,
+          formData.name,
+          selectedPermissions
+        );
+        toast.success("Role updated successfully!");
+      } else {
+        await createRoleWithPermissions(
+          formData.name,
+          restaurantId,
+          selectedPermissions
+        );
+        toast.success("Role created successfully!");
+      }
       await fetchRoles();
-      toast.success("Role created successfully!");
       setOpen(false);
     } catch (error) {
-      console.error("Error creating role:", error);
-      toast.error("Failed to create role.");
+      console.error("Error creating/updating role:", error);
+      toast.error("Failed to create/update role.");
+    }
+  };
+
+  const handleFilterChange = async ({
+    filters,
+    globalFilter,
+  }: {
+    filters: { id: string; value: string | number | null }[];
+    globalFilter: string;
+  }) => {
+    console.log("Filtering roles:", filters, globalFilter);
+    try {
+      const restaurantId = session?.user?.restaurantId;
+      if (typeof restaurantId === "number") {
+        let searchResults;
+        if (globalFilter) {
+          searchResults = await searchRole(
+            { global: globalFilter },
+            restaurantId
+          );
+        } else if (filters.length > 0) {
+          const filterParams = filters.reduce(
+            (acc: Record<string, string | number | null>, filter) => {
+              const value = filter.value;
+              if (
+                typeof value === "string" ||
+                typeof value === "boolean" ||
+                value === null
+              ) {
+                switch (filter.id) {
+                  case "name":
+                    acc.name = value;
+                    break;
+                  case "active":
+                    acc.Active = value;
+                    break;
+                  default:
+                    acc[filter.id] = value;
+                }
+              }
+              return acc;
+            },
+            {} as Record<string, string | number | null>
+          );
+
+          console.log("Filter params before calling searchRole:", filterParams);
+
+          searchResults = await searchRole(filterParams, restaurantId);
+          console.log("Column filter results:", searchResults);
+          setRoles(
+            Array.isArray(searchResults)
+              ? searchResults.map((role: any) => ({
+                  id: role.id,
+                  name: role.name,
+                  createdAt: new Date(role.createdAt).toLocaleString(),
+                  active: role.Active,
+                  permissions: role.permissions.map((perm: any) => ({
+                    action: perm.permission.action,
+                    subject: perm.permission.subject,
+                  })),
+                }))
+              : []
+          );
+        } else {
+          searchResults = await getRole(restaurantId);
+        }
+        console.log("Filter results:", searchResults);
+        setRoles(
+          Array.isArray(searchResults)
+            ? searchResults.map((role: any) => ({
+                id: role.id,
+                name: role.name,
+                createdAt: new Date(role.createdAt).toLocaleString(),
+                active: role.Active, // Correctly map the active property
+                permissions: role.permissions.map((perm: any) => ({
+                  action: perm.permission.action,
+                  subject: perm.permission.subject,
+                })),
+              }))
+            : []
+        );
+      } else {
+        console.error("Invalid restaurant ID:", restaurantId);
+      }
+    } catch (error) {
+      console.error("Failed to filter roles:", error);
     }
   };
 
@@ -174,7 +296,7 @@ const RolePage = () => {
     { accessorKey: "name", header: "Role Name" },
     { accessorKey: "createdAt", header: "Created At" },
     {
-      accessorKey: "Active",
+      accessorKey: "active",
       header: "Actions",
       Cell: ({ row }: any) => (
         <Box display="flex" alignItems="center">
@@ -184,24 +306,24 @@ const RolePage = () => {
                 sx={{
                   ml: 1,
                   fontSize: "0.8rem",
-                  color: row.original.Active ? "green" : "red",
+                  color: row.original.active ? "green" : "red",
                 }}
               >
-                {row.original.Active ? "Active" : "Inactive"}
+                {row.original.active ? "Active" : "Inactive"}
               </Typography>
               <Switch
-                checked={row.original.Active}
+                checked={row.original.active}
                 onChange={() =>
-                  handleToggleActive(row.original.id, !row.original.Active)
+                  handleToggleActive(row.original.id, !row.original.active)
                 }
                 sx={{
-                  color: row.original.Active ? "green" : "red",
+                  color: row.original.active ? "green" : "red",
                   fontSize: "0.7rem",
                 }}
               />
               <IconButton
                 sx={{ color: "#FFA500" }}
-                onClick={() => handleViewRole(row.original)}
+                onClick={() => handleEditRole(row.original)}
               >
                 <VisibilityIcon />
               </IconButton>
@@ -226,9 +348,9 @@ const RolePage = () => {
         data={roles}
         action="Add Role"
         onAdd={handleAddRole}
-        onEdit={(role) => console.log("Edit role:", role)}
+        onEdit={(role) => handleEditRole(role)}
         onDelete={handleDeleteRole}
-        onFilterChange={setSearchQuery} // Pass the search query handler
+        onFilterChange={handleFilterChange}
       />
 
       {/* Modal for Adding/Editing Role */}
@@ -250,7 +372,7 @@ const RolePage = () => {
           }}
         >
           <Typography variant="h6" gutterBottom>
-            {formData.name ? "Edit Role" : "Add New Role"}
+            {formData.id ? "Edit Role" : "Add New Role"}
           </Typography>
           <TextField
             label="Role Name"
@@ -294,7 +416,7 @@ const RolePage = () => {
             }}
             onClick={handleFormSubmit}
           >
-            {formData.name ? "Update Role" : "Add Role"}
+            {formData.id ? "Update Role" : "Add Role"}
           </Button>
         </Box>
       </Modal>

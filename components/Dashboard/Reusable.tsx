@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { MaterialReactTable } from "material-react-table";
 import { Button, Box } from "@mui/material";
 
@@ -10,7 +10,10 @@ type ReusableTableProps<DataType> = {
   onEdit?: (row: DataType) => void;
   onDelete?: (id: number) => void;
   action?: string;
-  onFilterChange?: (query: string) => void; // Add this prop for server-side filtering
+  onFilterChange: (params: {
+    filters: { id: string; value: string | number | null }[];
+    globalFilter: string;
+  }) => Promise<void>;
 };
 
 const ReusableTable = <DataType,>({
@@ -18,8 +21,26 @@ const ReusableTable = <DataType,>({
   data,
   onAdd,
   action,
-  onFilterChange, // Destructure the new prop
+  onFilterChange,
 }: ReusableTableProps<DataType>) => {
+  const [columnFilters, setColumnFilters] = React.useState<any[]>([]);
+  const [globalFilter, setGlobalFilter] = React.useState("");
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        await onFilterChange({
+          filters: columnFilters,
+          globalFilter,
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    loadData();
+  }, [columnFilters, globalFilter]);
+
   return (
     <div>
       <MaterialReactTable
@@ -27,16 +48,11 @@ const ReusableTable = <DataType,>({
         data={data}
         manualFiltering
         state={{
-          globalFilter: "",
-        }}
-        onGlobalFilterChange={(value: string) => {
-          if (onFilterChange) {
-            onFilterChange(value); // Call the parent component's filter change handler
-          }
+          columnFilters,
+          globalFilter,
         }}
         renderTopToolbarCustomActions={() => (
           <Box display="flex" justifyContent="space-between" gap={2}>
-            {/* Add Role Button */}
             {action && (
               <Button
                 variant="contained"
@@ -54,6 +70,8 @@ const ReusableTable = <DataType,>({
             )}
           </Box>
         )}
+        onColumnFiltersChange={setColumnFilters}
+        onGlobalFilterChange={setGlobalFilter}
       />
     </div>
   );
