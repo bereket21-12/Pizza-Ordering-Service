@@ -31,10 +31,8 @@ type RoleData = {
   name: string;
   createdAt: string;
   permissions: {
-    permission: {
-      action: string;
-      subject: string;
-    };
+    action: string;
+    subject: string;
   }[];
   active: boolean;
 };
@@ -76,7 +74,10 @@ const RolePage = () => {
           name: role.name,
           createdAt: new Date(role.createdAt).toLocaleString(),
           active: role.Active,
-          permissions: role.permissions,
+          permissions: role.permissions.map((perm: any) => ({
+            action: perm.permission.action,
+            subject: perm.permission.subject,
+          })),
         }))
       );
     } catch (error) {
@@ -120,7 +121,10 @@ const RolePage = () => {
           name: role.name,
           createdAt: new Date(role.createdAt).toLocaleString(),
           active: role.Active,
-          permissions: role.permissions,
+          permissions: role.permissions.map((perm: any) => ({
+            action: perm.permission.action,
+            subject: perm.permission.subject,
+          })),
         }))
       );
     } catch (error) {
@@ -155,9 +159,13 @@ const RolePage = () => {
   const handleEditRole = (role: RoleData) => {
     const permissions = role.permissions.reduce(
       (acc: { [key: string]: boolean }, perm) => {
-        console.log("perms", perm);
-        const { action, subject } = perm.permission; // Access action and subject directly
-        acc[`${action}${subject}`] = true;
+        console.log("perm", perm);
+        if (perm) {
+          const { action, subject } = perm;
+          acc[
+            `${action}${subject.charAt(0).toUpperCase() + subject.slice(1)}`
+          ] = true;
+        }
         return acc;
       },
       {}
@@ -168,7 +176,6 @@ const RolePage = () => {
       permissions,
     });
     setOpen(true);
-    console.log("permission", permissions);
   };
 
   const handleFormSubmit = async () => {
@@ -177,9 +184,8 @@ const RolePage = () => {
     const selectedPermissions = Object.keys(formData.permissions)
       .filter((key) => formData.permissions[key])
       .map((key) => {
-        const [action, ...subjectParts] = key.split(/(?=[A-Z])/);
-        const subject = subjectParts.join("").toLowerCase();
-        return { action, subject: subject.toLowerCase() };
+        const [action, subject] = key.split(/(?=[A-Z])/);
+        return { action, subject: subject ? subject.toLowerCase() : "" };
       });
 
     try {
@@ -363,7 +369,7 @@ const RolePage = () => {
             transform: "translate(-50%, -50%)",
             width: 500,
             bgcolor: "white",
-            boxShadow: 24,
+            boxShadow: 4,
             borderRadius: 2,
             p: 4,
             display: "flex",
@@ -388,14 +394,24 @@ const RolePage = () => {
                 key={action + subject}
                 control={
                   <Checkbox
-                    name={`${action}${subject}`}
-                    checked={!!formData.permissions[`${action}${subject}`]}
+                    name={`${action}${
+                      subject.charAt(0).toUpperCase() + subject.slice(1)
+                    }`}
+                    checked={
+                      !!formData.permissions[
+                        `${action}${
+                          subject.charAt(0).toUpperCase() + subject.slice(1)
+                        }`
+                      ]
+                    }
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         permissions: {
                           ...formData.permissions,
-                          [`${action}${subject}`]: e.target.checked,
+                          [`${action}${
+                            subject.charAt(0).toUpperCase() + subject.slice(1)
+                          }`]: e.target.checked,
                         },
                       })
                     }

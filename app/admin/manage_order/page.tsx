@@ -111,7 +111,7 @@ const ManageOrderPage: React.FC = () => {
 
   const columns = [
     { accessorKey: "Pizza.name", header: "Pizza Name" },
-    ability.can("read", "user")
+    ability.can("read", "customer")
       ? { accessorKey: "customer.phoneNumber", header: "Phone Number" }
       : null,
     {
@@ -127,7 +127,7 @@ const ManageOrderPage: React.FC = () => {
       ),
     },
     { accessorKey: "quantity", header: "Quantity" },
-    ability.can("update", "Order")
+    ability.can("update", "order")
       ? {
           accessorKey: "status",
           header: "Status",
