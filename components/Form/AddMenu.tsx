@@ -1,14 +1,23 @@
-'use client';
-import React, { useRef, useState, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
-import { Box, Button, Checkbox, FormControlLabel, FormGroup, TextField, Typography } from '@mui/material';
+"use client";
+import React, { useRef, useState, useEffect } from "react";
+import { toast } from "react-hot-toast";
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  TextField,
+  Typography,
+} from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import styled from "@emotion/styled";
 import AddIcon from "@mui/icons-material/Add";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { useActionStateCompat } from "@strozw/use-action-state-compat";
-import { handleCreateMenu } from '@/actions/adminAction';
+import { handleCreateMenu } from "@/actions/adminAction";
 import { useSession } from "next-auth/react";
+import { menuSchema } from "@/utils/schema";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -31,10 +40,13 @@ function AddMenu() {
     "Mozzarella",
     "Onions",
     "Bell Peppers",
-    "Olives"
+    "Olives",
   ]);
   const [state, executeAction] = useActionStateCompat(handleCreateMenu, null);
-const {data:session} = useSession();
+  const { data: session } = useSession();
+
+  const [errors, setErrors] = useState<{ name?: string; price?: string }>({});
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
@@ -42,57 +54,65 @@ const {data:session} = useSession();
     }
   };
 
- 
   const handleAddTopping = () => {
-    setExtraToppings([...extraToppings, ""]); 
+    setExtraToppings([...extraToppings, ""]);
   };
 
   const handleCheckboxChange = (topping: string) => {
     setCheckedToppings((prev) =>
-      prev.includes(topping) ? prev.filter((t) => t !== topping) : [...prev, topping]
+      prev.includes(topping)
+        ? prev.filter((t) => t !== topping)
+        : [...prev, topping]
     );
   };
 
- 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    
-    
+
     const data = {
-      name: formData.get('Name') as string,
-      price: formData.get('Price') as string,
+      name: formData.get("Name") as string,
+      price: formData.get("Price") as string,
       toppings: [
         ...checkedToppings,
-        ...extraToppings.filter((topping) => topping.trim() !== ""), 
+        ...extraToppings.filter((topping) => topping.trim() !== ""),
       ],
     };
-    
-    console.log('Form submitted:', data);
 
-    
+    // Validate the form data using Zod
+    const validationResult = menuSchema.safeParse(data);
+    if (!validationResult.success) {
+      const errors = validationResult.error.flatten().fieldErrors;
+      setErrors({
+        name: errors.name?.[0],
+        price: errors.price?.[0],
+      });
+      return;
+    }
+
+    console.log("Form submitted:", data);
+
     const formDataToSend = new FormData();
-    formDataToSend.append('name', data.name);
-    formDataToSend.append('price', data.price);
-    formDataToSend.append('id', String(session?.user?.restaurantId))
+    formDataToSend.append("name", data.name);
+    formDataToSend.append("price", data.price);
+    formDataToSend.append("id", String(session?.user?.restaurantId));
     data.toppings.forEach((topping, index) => {
-      formDataToSend.append(`toppings[${index}]`, topping); 
+      formDataToSend.append(`toppings[${index}]`, topping);
     });
-    
+
     if (selectedFile) {
-      formDataToSend.append('image', selectedFile);
+      formDataToSend.append("image", selectedFile);
     }
 
     executeAction(formDataToSend);
   };
 
   useEffect(() => {
-    if ( state?.success ) {
+    if (state?.success) {
       toast.success("Menu added successfully");
       ref.current?.reset();
       router.push("/admin/menu");
-    }
-    else if (state?.error) {
+    } else if (state?.error) {
       toast.error("Failed to add menu");
     }
   }, [state?.success, router]);
@@ -117,11 +137,31 @@ const {data:session} = useSession();
         alignItems: "center",
       }}
     >
-      <Box sx={{ width: "40%", m: "auto", display: "flex", flexDirection: "column", gap: 2 }}>
-        <Typography sx={{ alignSelf: "center", fontSize: "1.3rem" }}>Add Menu</Typography>
-        <TextField label={"Name"} type={"text"} name={"Name"} />
+      <Box
+        sx={{
+          width: "40%",
+          m: "auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        <Typography sx={{ alignSelf: "center", fontSize: "1.3rem" }}>
+          Add Menu
+        </Typography>
+        <TextField
+          label={"Name"}
+          type={"text"}
+          name={"Name"}
+          error={!!errors.name}
+          helperText={errors.name}
+        />
 
-        <Typography sx={{ fontSize: "1.4rem", color: "gray", alignSelf: "start" }}>Topping</Typography>
+        <Typography
+          sx={{ fontSize: "1.4rem", color: "gray", alignSelf: "start" }}
+        >
+          Topping
+        </Typography>
         <FormGroup sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
           {/* Predefined Checkboxes */}
           {["Mozzarella", "Onions", "Bell Peppers", "Olives"].map((topping) => (
@@ -142,7 +182,12 @@ const {data:session} = useSession();
           ))}
           {/* Button to add new text field */}
           <Button
-            sx={{ width: 30, height: 30, minWidth: 30, backgroundColor: "#FFA500" }}
+            sx={{
+              width: 30,
+              height: 30,
+              minWidth: 30,
+              backgroundColor: "#FFA500",
+            }}
             variant="contained"
             onClick={handleAddTopping}
           >
@@ -167,7 +212,13 @@ const {data:session} = useSession();
           />
         ))}
 
-        <TextField label={"Price"} type={"number"} name={"Price"} />
+        <TextField
+          label={"Price"}
+          type={"number"}
+          name={"Price"}
+          error={!!errors.price}
+          helperText={errors.price}
+        />
         <Button
           sx={{
             color: "#FFA500",
@@ -193,9 +244,8 @@ const {data:session} = useSession();
           />
         </Button>
 
-        
         <Button
-          type='submit'
+          type="submit"
           sx={{
             color: "white",
             backgroundColor: "#FFA500",

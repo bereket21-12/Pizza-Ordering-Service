@@ -173,6 +173,7 @@ export default function Login() {
         <Button
           type="submit"
           variant="contained"
+          name="login-button"
           sx={{
             backgroundColor: "#FFA500",
             fontSize: "1rem",

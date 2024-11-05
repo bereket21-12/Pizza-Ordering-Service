@@ -1,5 +1,17 @@
 import * as z from "zod";
 
+export const roleSchema = z.object({
+  name: z.string().nonempty("Role Name is required"),
+});
+
+export const menuSchema = z.object({
+  name: z.string().nonempty("Name is required"),
+  price: z.string().nonempty("Price is required"),
+  toppings: z
+    .array(z.string().nonempty())
+    .min(1, "At least one topping is required"),
+});
+
 export const signUpSchema = z
   .object({
     email: z.string().email("Invalid email address."),

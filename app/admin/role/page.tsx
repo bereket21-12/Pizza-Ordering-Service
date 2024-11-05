@@ -189,23 +189,34 @@ const RolePage = () => {
       });
 
     try {
+      let response;
       if (formData.id) {
-        await updateRoleWithPermissions(
+        response = await updateRoleWithPermissions(
           formData.id,
           formData.name,
           selectedPermissions
         );
-        toast.success("Role updated successfully!");
       } else {
-        await createRoleWithPermissions(
+        response = await createRoleWithPermissions(
           formData.name,
           restaurantId,
           selectedPermissions
         );
-        toast.success("Role created successfully!");
       }
-      await fetchRoles();
-      setOpen(false);
+
+      if ("success" in response && response.success) {
+        toast.success(
+          formData.id
+            ? "Role updated successfully!"
+            : "Role created successfully!"
+        );
+        await fetchRoles();
+        setOpen(false);
+      } else {
+        toast.error(
+          formData.id ? "Failed to create role!" : "Failed to update role!"
+        );
+      }
     } catch (error) {
       console.error("Error creating/updating role:", error);
       toast.error("Failed to create/update role.");

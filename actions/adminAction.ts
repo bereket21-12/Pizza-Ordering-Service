@@ -14,6 +14,7 @@ import {
   adminSchema,
   MenuSchema,
   restaurantSchema,
+  roleSchema,
   signUpSchema,
 } from "../utils/schema.ts";
 import { uploadImage } from "./uploadImage.ts";
@@ -414,45 +415,135 @@ export const createRoleWithPermissions = async (
   id: number,
   permissions: { action: string; subject: string }[]
 ) => {
-  // Step 1: Ensure all permissions exist before creating the role
-  const permissionIds = await Promise.all(
-    permissions.map(async ({ action, subject }) => {
-      // Use findFirst or create the permission if it doesn't exist
-      const existingPermission = await prisma.permission.findFirst({
-        where: { action, subject },
-      });
-
-      const permission = existingPermission
-        ? existingPermission
-        : await prisma.permission.create({
-            data: { action, subject },
-          });
-      return permission.id;
-    })
-  );
-
-  // Step 2: Create the role and connect the existing permissions
-  const newRole = await prisma.role.create({
-    data: {
-      name: roleName,
-      restaurant: {
-        connect: { id: id }, // Assuming you have a restaurant ID to connect
-      },
-      permissions: {
-        create: permissionIds.map((permissionId) => ({
-          permission: {
-            connect: { id: permissionId },
-          },
-        })),
-      },
-    },
-    include: {
-      permissions: { include: { permission: true } },
-    },
+  const result = roleSchema.safeParse({
+    name: roleName,
+    permissions: permissions.reduce((acc, { action, subject }) => {
+      const key = `${action}${
+        subject.charAt(0).toUpperCase() + subject.slice(1)
+      }`;
+      acc[key] = true;
+      return acc;
+    }, {} as Record<string, boolean>),
   });
 
-  return newRole;
+  if (!result.success) {
+    return {
+      success: false,
+      message: "Validation failed",
+      errors: result.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    // Step 1: Ensure all permissions exist before creating the role
+    const permissionIds = await Promise.all(
+      permissions.map(async ({ action, subject }) => {
+        // Use findFirst or create the permission if it doesn't exist
+        const existingPermission = await prisma.permission.findFirst({
+          where: { action, subject },
+        });
+
+        const permission = existingPermission
+          ? existingPermission
+          : await prisma.permission.create({
+              data: { action, subject },
+            });
+        return permission.id;
+      })
+    );
+
+    // Step 2: Create the role and connect the existing permissions
+    const newRole = await prisma.role.create({
+      data: {
+        name: roleName,
+        restaurant: {
+          connect: { id: id }, // Assuming you have a restaurant ID to connect
+        },
+        permissions: {
+          create: permissionIds.map((permissionId) => ({
+            permission: {
+              connect: { id: permissionId },
+            },
+          })),
+        },
+      },
+      include: {
+        permissions: { include: { permission: true } },
+      },
+    });
+
+    return { success: true, data: newRole };
+  } catch (error) {
+    console.error("Error creating role with permissions:", error);
+    return {
+      success: false,
+      message: "Failed to create role",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Error creating role with permissions:",
+    };
+  }
 };
+
+// export const createRoleWithPermissions = async (
+//   roleName: string,
+//   id: number,
+//   permissions: { action: string; subject: string }[]
+// ) => {
+//   const resutl = roleSchema.safeParse({
+//     name: roleName,
+//     permissions: permissions.reduce((acc, { action, subject }) => {
+//       const key = `${action}${
+//         subject.charAt(0).toUpperCase() + subject.slice(1)
+//       }`;
+//       acc[key] = true;
+//       return acc;
+//     }, {} as Record<string, boolean>),
+//   });
+//   if (!resutl.success) {
+//     return { errors: resutl.error.flatten().fieldErrors };
+//   }
+
+//   // Step 1: Ensure all permissions exist before creating the role
+//   const permissionIds = await Promise.all(
+//     permissions.map(async ({ action, subject }) => {
+//       // Use findFirst or create the permission if it doesn't exist
+//       const existingPermission = await prisma.permission.findFirst({
+//         where: { action, subject },
+//       });
+
+//       const permission = existingPermission
+//         ? existingPermission
+//         : await prisma.permission.create({
+//             data: { action, subject },
+//           });
+//       return permission.id;
+//     })
+//   );
+
+//   // Step 2: Create the role and connect the existing permissions
+//   const newRole = await prisma.role.create({
+//     data: {
+//       name: roleName,
+//       restaurant: {
+//         connect: { id: id }, // Assuming you have a restaurant ID to connect
+//       },
+//       permissions: {
+//         create: permissionIds.map((permissionId) => ({
+//           permission: {
+//             connect: { id: permissionId },
+//           },
+//         })),
+//       },
+//     },
+//     include: {
+//       permissions: { include: { permission: true } },
+//     },
+//   });
+
+//   return newRole;
+// };
 
 // Assign a role to a user
 export const assignRoleToUser = async (userId: number, roleId: number) => {
