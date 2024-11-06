@@ -629,11 +629,21 @@ export const createAdmin = async (formData: FormData) => {
 
   const { confirmPassword, ...userData } = results.data;
 
-  // Hash the admin's password
+  const existingUser = await prisma.user.findUnique({
+    where: { email: formValues.email },
+  });
+
+  if (existingUser) {
+    return {
+      success: false,
+      error: "Email already exists",
+    };
+  }
+
   const hashedPassword = await bcrypt.hash(userData.password, 10);
 
   try {
-    const newAdmin = prisma.user.create({
+    const newAdmin = await prisma.user.create({
       data: {
         email: formValues.email,
         password: hashedPassword,
@@ -653,7 +663,10 @@ export const createAdmin = async (formData: FormData) => {
     return { success: true, admin: newAdmin };
   } catch (error) {
     console.error("Error creating admin", error);
-    return { success: false, error: "Could not create the admin" };
+    return {
+      success: false,
+      error: "Could not create the admin",
+    };
   }
 };
 
@@ -779,6 +792,18 @@ export const deleteRole = async (id: number) => {
   });
 };
 
+export const deleteUser = async (id: number) => {
+  const response = await prisma.user.delete({
+    where: {
+      id: id,
+    },
+  });
+
+  if (response) {
+    return { success: true, response };
+  }
+  return { success: false, error: "Could not delete user" };
+};
 export const UpdateRole = async (id: number, Active: boolean) => {
   return await prisma.role.update({
     where: {

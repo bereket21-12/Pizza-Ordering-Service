@@ -10,17 +10,18 @@ import {
   IconButton,
   Switch,
 } from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   getRole,
   createAdmin,
   getUserByRestaurant,
   searchUser,
   updateUser,
+  deleteUser,
 } from "@/actions/adminAction";
 import ReusableTable from "@/components/Dashboard/Reusable";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 type UserData = {
   id: number;
@@ -228,8 +229,12 @@ const MyTable = () => {
             }
             color="primary"
           />
-          <IconButton sx={{ color: "#FFA500" }}>
-            <VisibilityIcon />
+          <IconButton
+            sx={{ color: "black" }}
+            color="error"
+            onClick={() => handleDeleteUser(row.original.id)}
+          >
+            <DeleteIcon />
           </IconButton>
         </Box>
       ),
@@ -260,28 +265,43 @@ const MyTable = () => {
     formDataToSubmit.append("restaurantId", id.toString());
 
     try {
-      await createAdmin(formDataToSubmit);
-      setUsers((prev) => [
-        ...prev,
-        {
-          ...formData,
-          id: Math.random(),
-          role:
-            roles.find((r) => r.id.toString() === formData.role)?.name || "",
-          Active: true, // Set Active to true for new users
-        },
-      ]);
-      setOpen(false);
-      toast.success("User added successfully!");
+      const response = await createAdmin(formDataToSubmit);
+
+      if (response.success == true) {
+        setUsers((prev) => [
+          ...prev,
+          {
+            ...formData,
+            id: Math.random(),
+            role:
+              roles.find((r) => r.id.toString() === formData.role)?.name || "",
+            Active: true,
+          },
+        ]);
+        setOpen(false);
+        toast.success("User added successfully!");
+      } else {
+        console.error(
+          "Error creating user:",
+          response.errors || response.error
+        );
+        toast.error("Failed to create user.");
+      }
     } catch (error) {
       console.error("Error creating user:", error);
       toast.error("Failed to create user.");
     }
   };
 
-  const handleDeleteUser = (id: number) => {
-    setUsers((prev) => prev.filter((user) => user.id !== id));
-    toast.success("User deleted successfully!");
+  const handleDeleteUser = async (id: number) => {
+    try {
+      await deleteUser(id);
+      toast.success("User deleted successfully!");
+      setUsers((prev) => prev.filter((user) => user.id !== id));
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+      toast.error("Failed to delete user.");
+    }
   };
 
   return (
