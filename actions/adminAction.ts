@@ -486,65 +486,6 @@ export const createRoleWithPermissions = async (
   }
 };
 
-// export const createRoleWithPermissions = async (
-//   roleName: string,
-//   id: number,
-//   permissions: { action: string; subject: string }[]
-// ) => {
-//   const resutl = roleSchema.safeParse({
-//     name: roleName,
-//     permissions: permissions.reduce((acc, { action, subject }) => {
-//       const key = `${action}${
-//         subject.charAt(0).toUpperCase() + subject.slice(1)
-//       }`;
-//       acc[key] = true;
-//       return acc;
-//     }, {} as Record<string, boolean>),
-//   });
-//   if (!resutl.success) {
-//     return { errors: resutl.error.flatten().fieldErrors };
-//   }
-
-//   // Step 1: Ensure all permissions exist before creating the role
-//   const permissionIds = await Promise.all(
-//     permissions.map(async ({ action, subject }) => {
-//       // Use findFirst or create the permission if it doesn't exist
-//       const existingPermission = await prisma.permission.findFirst({
-//         where: { action, subject },
-//       });
-
-//       const permission = existingPermission
-//         ? existingPermission
-//         : await prisma.permission.create({
-//             data: { action, subject },
-//           });
-//       return permission.id;
-//     })
-//   );
-
-//   // Step 2: Create the role and connect the existing permissions
-//   const newRole = await prisma.role.create({
-//     data: {
-//       name: roleName,
-//       restaurant: {
-//         connect: { id: id }, // Assuming you have a restaurant ID to connect
-//       },
-//       permissions: {
-//         create: permissionIds.map((permissionId) => ({
-//           permission: {
-//             connect: { id: permissionId },
-//           },
-//         })),
-//       },
-//     },
-//     include: {
-//       permissions: { include: { permission: true } },
-//     },
-//   });
-
-//   return newRole;
-// };
-
 // Assign a role to a user
 export const assignRoleToUser = async (userId: number, roleId: number) => {
   return await prisma.userRole.create({
@@ -921,33 +862,6 @@ export async function searchRole(
     throw new Error("Could not fetch roles. Please try again later.");
   }
 }
-
-// export const searchUser = async (name: string, id: number) => {
-//   return await prisma.user.findMany({
-//     where: {
-//       restaurantId: id,
-//       name: {
-//         contains: name,
-//         mode: "insensitive",
-//       },
-//     },
-//     select: {
-//       email: true,
-//       name: true,
-//       phoneNumber: true,
-//       Active: true,
-//       roles: {
-//         select: {
-//           role: {
-//             select: {
-//               name: true,
-//             },
-//           },
-//         },
-//       },
-//     },
-//   });
-// };
 
 export async function searchUser(
   query: string | Record<string, any>,

@@ -1,33 +1,41 @@
 import { test, expect } from "@playwright/test";
+let isChecked = false;
 
-test.describe("Role Page", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto("https://2f-pizza-order.vercel.app/login");
+test("Update role status", async ({ page }) => {
+  await page.goto("https://2f-pizza-order.vercel.app/login");
+  await page.getByLabel("Email Address").click();
+  await page.getByLabel("Email Address").fill("Admin@gmail.com");
+  await page.getByLabel("Password").click();
+  await page.getByLabel("Password").fill("123456");
+  await page.getByRole("button", { name: "Login" }).click();
+  await page.waitForURL("https://2f-pizza-order.vercel.app/admin/manage_order");
+  await page
+    .locator("div")
+    .filter({ hasText: /^\/admin\/manage_order$/ })
+    .getByRole("button")
+    .click();
+  await page.getByText("Role").click();
+  await page.waitForURL("https://2f-pizza-order.vercel.app/admin/role");
+  isChecked = await page
+    .getByRole("row", { name: "kitchen manager 11/6/2024, 2:" })
 
-    await page.fill('input[name="email"]', "Admin@gmail.com");
-    await page.fill('input[name="password"]', "123456");
-    await page.click('button[type="submit"]');
+    .getByRole("checkbox")
+    .isChecked();
+  if (isChecked) {
+    await page
+      .getByRole("row", { name: "kitchen manager 11/6/2024, 2:" })
 
-    await page.waitForURL(
-      "https://2f-pizza-order.vercel.app/admin/manage_order"
-    );
+      .getByRole("checkbox")
+      .uncheck();
+  } else {
+    await page
+      .getByRole("row", { name: "kitchen manager 11/6/2024, 2:" })
 
-    await page.goto("https://2f-pizza-order.vercel.app/admin/role");
-  });
-
-  test("should render the roles and allow toggling active status", async ({
-    page,
-  }) => {
-    await expect(page.locator("text=Admin")).toBeVisible();
-
-    const activeSwitch = page
-      .getByRole("row", { name: "kitchen manager 11/3/2024, 9:" })
-      .getByRole("checkbox");
-    await expect(activeSwitch).toBeChecked({ timeout: 500000 });
-
-    await activeSwitch.click();
-    await page.locator("text=Role status updated successfully!");
-
-    await expect(activeSwitch).not.toBeChecked({ timeout: 500000 });
-  });
+      .getByRole("checkbox")
+      .check();
+  }
+  await expect(page.getByRole("status")).toContainText(
+    "Role status updated successfully!",
+    { timeout: 50000 }
+  );
 });

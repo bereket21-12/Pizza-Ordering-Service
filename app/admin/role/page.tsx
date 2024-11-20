@@ -214,12 +214,14 @@ const RolePage = () => {
         setOpen(false);
       } else {
         toast.error(
-          formData.id ? "Failed to create role!" : "Failed to update role!"
+          formData.id ? "Failed to Update role!" : "Failed to Create role!"
         );
       }
     } catch (error) {
       console.error("Error creating/updating role:", error);
       toast.error("Failed to create/update role.");
+      await fetchRoles();
+      setOpen(false);
     }
   };
 
